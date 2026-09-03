@@ -4,54 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FireFly — Aventuras no Bosque</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="game-shell">
-    <section class="game-frame" aria-label="Jogo FireFly">
-      <div class="topbar">
-        <div class="brand"><span class="brand-mark">✦</span><span>FIREFLY</span><small>aventuras no bosque</small></div>
-        <div class="top-actions">
-          <div class="coin-pill">✦ <strong id="coins">25</strong></div>
-          <button class="icon-button" id="soundBtn" aria-label="Alternar som">♪</button>
-          <button class="icon-button" id="helpBtn" aria-label="Ajuda">?</button>
+  <main id="gameShell" aria-label="FireFly, jogo de exploração e captura">
+    <canvas id="game" width="1280" height="720" aria-label="Mundo do FireFly"></canvas>
+
+    <section id="hud" aria-label="Interface do jogo">
+      <div class="brand">
+        FIREFLY <span>aventuras no bosque</span>
+      </div>
+
+      <div class="status">
+        <span id="time">☀ DIA</span>
+        <span>✦ <b id="coins">25</b></span>
+      </div>
+
+      <div class="tool">
+        <i>⌒</i>
+        <div>
+          <b>REDE DE FIOS</b>
+          <small id="prompt">Explore a vila</small>
         </div>
       </div>
 
-      <div id="world" class="world village" tabindex="0" aria-label="Área jogável">
-        <div class="sky-decor"><i class="cloud c1"></i><i class="cloud c2"></i><i class="sun"></i></div>
-        <div id="sceneLabel" class="scene-label"><span>⌂</span><div><b>VILA LUMINA</b><small>um lugar bem esquisito e acolhedor</small></div></div>
-        <div class="sign shop-sign">LOJINHA<br><small>coisas úteis</small></div>
-        <div class="house shop-house"><div class="roof"></div><div class="door"></div><div class="window"></div></div>
-        <div class="sign board-sign">MISSÕES</div><div class="quest-board">☼<br><small>Hoje:</small><br>3 SAPOS</div>
-        <div class="npc" id="npc"><span>🧙</span><label>TITO</label><em>!</em></div>
-        <div class="van-zone" id="van"><div class="van"><span class="van-window"></span><span class="van-window second"></span><span class="wheel w1"></span><span class="wheel w2"></span><b>FIREFLY</b></div><div class="van-label">VAN DE EXPLORAÇÃO <kbd>E</kbd></div></div>
-        <div class="garden"><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="ground village-ground"></div>
-        <div class="player" id="player"><span class="net">⌒</span><span class="player-head">🙂</span><span class="player-body"></span></div>
-        <div class="hint" id="worldHint">Use <b>A</b><b>D</b> ou <b>←</b><b>→</b> para andar</div>
-      </div>
+      <div class="keys">
+        <button data-panel="bag">
+          I <small>Mochila</small>
+        </button>
 
-      <div class="hud">
-        <button class="hud-item active" data-panel="bag"><span>🎒</span><b>MOCHILA</b><small>i</small></button>
-        <button class="hud-item" data-panel="book"><span>📖</span><b>BESTIÁRIO</b><small>b</small></button>
-        <button class="hud-item" data-panel="quest"><span>📌</span><b>MISSÕES</b><small>m</small></button>
-        <div class="capture-tip" id="captureTip"><span>⌒</span><div><b>REDE PRONTA!</b><small>Aproxime-se de uma criatura e aperte <kbd>ESPAÇO</kbd></small></div></div>
+        <button data-panel="book">
+          B <small>Bestiário</small>
+        </button>
+
+        <button data-panel="quest">
+          M <small>Missões</small>
+        </button>
       </div>
     </section>
 
-    <aside class="side-panel" id="sidePanel">
-      <button class="close-panel" id="closePanel">×</button>
-      <div id="panelContent"></div>
-    </aside>
-  </main>
+    <aside id="panel" class="hidden"></aside>
 
-  <div class="modal hidden" id="travelModal"><div class="modal-card travel-card"><button class="modal-close">×</button><span class="modal-icon">🚐</span><h2>Para onde vamos?</h2><p>A van está abastecida com suco de mirtilo. Quase.</p><button class="destination" id="forestBtn"><span>🌲</span><div><b>Floresta Cintilante</b><small>vagalumes, lagos e segredinhos</small></div><i>→</i></button><button class="destination locked" disabled><span>🏝️</span><div><b>Lagos Borbulhantes</b><small>em breve</small></div><i>🔒</i></button><button class="destination locked" disabled><span>❄️</span><div><b>Tundra Sussurrante</b><small>em breve</small></div><i>🔒</i></button></div></div>
-  <div class="modal hidden" id="dialogModal"><div class="modal-card dialog-card"><button class="modal-close">×</button><span class="modal-icon">🧙</span><h2>Tito, o inventor</h2><p>"Minha nova rede é tão macia que os bichinhos até pedem autógrafo. Capture <b>3 sapos</b> e eu te dou uma surpresa!"</p><button class="primary modal-close">Entendi!</button></div></div>
-  <div class="toast" id="toast"></div>
+    <div id="dialog" class="hidden"></div>
+
+    <div id="toast" role="status"></div>
+  </main>
   <script src="game.js"></script>
 </body>
 </html>

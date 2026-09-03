@@ -1,29 +1,67 @@
 # FireFly
 
-Um MVP web jogável de exploração e captura de criaturas, feito em HTML, CSS e JavaScript sem dependências de build.
+# FireFly
 
-## Como executar
+Um jogo 2D de exploração, captura de criaturas e pesca feito para rodar diretamente no navegador.
 
-Abra `index.html` em um navegador moderno ou sirva o diretório com:
+O FireFly utiliza `canvas` para renderizar o mundo e seus elementos de jogo, incluindo:
 
+- personagem
+- criaturas
+- NPCs
+- cenário
+- água
+- partículas
+- iluminação
+- efeitos
+- animações
+- câmera
+
+A experiência é construída como um jogo 2D real, e não como uma página HTML composta por elementos de interface.
+
+## Executar
+
+O jogo foi desenvolvido para rodar diretamente no navegador.
+
+Não é necessário um processo de build complexo.
+
+Para executar localmente, abra o projeto através de um servidor local ou utilize a configuração de desenvolvimento existente.
+
+Exemplo:
+
+```bash
+npm install
+npm run dev
 ```bash
 python3 -m http.server 8000
 ```
 
-Depois acesse `http://localhost:8000`.
+Abra `http://localhost:8000` em um navegador moderno.
 
 ## Controles
 
-- `A` / `D` ou setas: mover o explorador.
-- `E`: abrir a rota da van no lobby.
-- `Espaço`: capturar a criatura mais próxima na floresta.
-- `I`, `B`, `M`: abrir mochila, bestiário e missões.
+- `A` / `D` ou setas: caminhar.
+- `Shift`: correr.
+- `E`: interagir com NPCs, utilizar a van e pescar à margem do lago.
+- `Espaço`: utilizar a rede e tentar capturar a criatura mais próxima na floresta.
+- `I`: abrir a mochila.
+- `B`: abrir o bestiário.
+- `M`: abrir as missões.
+- `N`: avançar o ciclo de dia/noite manualmente.
 
-## MVP incluído
+## Sistemas do MVP
 
-- Vila Lumina jogável, com NPC, quadro de missões, loja cenográfica e van.
-- Viagem física pela van para a Floresta Cintilante.
-- Floresta com árvores, lago, caverna e seis criaturas colecionáveis.
-- Inventário, bestiário oculto/progressivo, missão de sapos e moedas.
-- Alternância visual de dia/noite pelo botão de música no topo.
-- Estado da mochila preservado ao retornar à vila durante a sessão.
+- **Vila Lumina:** vila jogável com oficina, NPC Tito, quadro de missões, loja e van de exploração.
+- **Van de exploração:** viagem entre a Vila Lumina e a Floresta Cintilante.
+- **Floresta Cintilante:** floresta em camadas, árvores variadas, vegetação, lago de margem irregular e entrada de caverna.
+- **Vida no mundo:** movimento com aceleração, câmera suave, criaturas com comportamentos próprios, partículas, água e ambiente animados.
+- **Criaturas:** borboletas, sapos, lagartixas, aranhas, vagalumes, vagalume raro, morcegos e peixes.
+- **Captura:** sistema de captura com rede e feedback visual.
+- **Pesca:** sistema de pesca no lago.
+- **Inventário:** mochila com criaturas, peixes, materiais, ferramentas e moedas.
+- **Bestiário:** registro das criaturas descobertas.
+- **Missões:** objetivos simples oferecidos por NPCs.
+- **Dia/noite:** iluminação e atmosfera mudam entre dia e noite.
+- **Vagalumes:** aparecem durante a noite, incluindo uma variante rara.
+- **Áudio:** sistema preparado para música, ambiente e efeitos sonoros.
+- **Estado da sessão:** inventário, moedas e criaturas descobertas permanecem ao viajar entre áreas.
