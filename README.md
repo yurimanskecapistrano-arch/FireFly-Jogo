@@ -1,9 +1,37 @@
 # FireFly
 
-Um protótipo 2D de exploração feito para rodar diretamente no navegador, sem etapa de build. O mundo é renderizado em `canvas`: personagens, criaturas, cenário, partículas, iluminação e câmera são desenhados e animados pelo jogo em vez de montados como uma página de elementos HTML.
+# FireFly
+
+Um jogo 2D de exploração, captura de criaturas e pesca feito para rodar diretamente no navegador.
+
+O FireFly utiliza `canvas` para renderizar o mundo e seus elementos de jogo, incluindo:
+
+- personagem
+- criaturas
+- NPCs
+- cenário
+- água
+- partículas
+- iluminação
+- efeitos
+- animações
+- câmera
+
+A experiência é construída como um jogo 2D real, e não como uma página HTML composta por elementos de interface.
 
 ## Executar
 
+O jogo foi desenvolvido para rodar diretamente no navegador.
+
+Não é necessário um processo de build complexo.
+
+Para executar localmente, abra o projeto através de um servidor local ou utilize a configuração de desenvolvimento existente.
+
+Exemplo:
+
+```bash
+npm install
+npm run dev
 ```bash
 python3 -m http.server 8000
 ```
@@ -12,17 +40,28 @@ Abra `http://localhost:8000` em um navegador moderno.
 
 ## Controles
 
-- `A` / `D` ou setas: caminhar (`Shift` corre).
-- `E`: interagir com Tito, usar a van e pescar à margem do lago.
-- `Espaço`: usar a rede na floresta.
-- `I`, `B`, `M`: mochila, bestiário e missões.
-- `N`: avança o ciclo de dia/noite (controle útil para testar os vagalumes).
+- `A` / `D` ou setas: caminhar.
+- `Shift`: correr.
+- `E`: interagir com NPCs, utilizar a van e pescar à margem do lago.
+- `Espaço`: utilizar a rede e tentar capturar a criatura mais próxima na floresta.
+- `I`: abrir a mochila.
+- `B`: abrir o bestiário.
+- `M`: abrir as missões.
+- `N`: avançar o ciclo de dia/noite manualmente.
 
 ## Sistemas do MVP
 
-- **Vila Lumina:** oficina desenhada, Tito animado e van de exploração.
-- **Floresta Cintilante:** floresta em camadas, árvores orgânicas variadas, lago de margem irregular e uma entrada de caverna mineral.
-- **Vida no mundo:** movimento com aceleração, câmera suave, criaturas com silhuetas próprias, partículas, água e ambiente animados.
-- **Captura e pesca:** rede com feedback visual/partículas, peixes no lago, inventário, bestiário e missão inicial.
-- **Dia/noite:** iluminação completa do mapa e vagalumes luminosos, incluindo uma variante lilás rara.
-- **Áudio:** `AUDIO` é uma interface preparada para arquivos reais de ambiente, música e efeitos; nenhum som é simulado sem asset.
+- **Vila Lumina:** vila jogável com oficina, NPC Tito, quadro de missões, loja e van de exploração.
+- **Van de exploração:** viagem entre a Vila Lumina e a Floresta Cintilante.
+- **Floresta Cintilante:** floresta em camadas, árvores variadas, vegetação, lago de margem irregular e entrada de caverna.
+- **Vida no mundo:** movimento com aceleração, câmera suave, criaturas com comportamentos próprios, partículas, água e ambiente animados.
+- **Criaturas:** borboletas, sapos, lagartixas, aranhas, vagalumes, vagalume raro, morcegos e peixes.
+- **Captura:** sistema de captura com rede e feedback visual.
+- **Pesca:** sistema de pesca no lago.
+- **Inventário:** mochila com criaturas, peixes, materiais, ferramentas e moedas.
+- **Bestiário:** registro das criaturas descobertas.
+- **Missões:** objetivos simples oferecidos por NPCs.
+- **Dia/noite:** iluminação e atmosfera mudam entre dia e noite.
+- **Vagalumes:** aparecem durante a noite, incluindo uma variante rara.
+- **Áudio:** sistema preparado para música, ambiente e efeitos sonoros.
+- **Estado da sessão:** inventário, moedas e criaturas descobertas permanecem ao viajar entre áreas.
