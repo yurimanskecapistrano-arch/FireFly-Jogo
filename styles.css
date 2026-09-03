@@ -1,1 +1,482 @@
-:root{--paper:#fff5dd;--ink:#24344b;--pine:#175657;--gold:#ffc867}*{box-sizing:border-box}html,body{height:100%;margin:0;background:#142d37;color:var(--ink);font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif}body{display:grid;place-items:center;overflow:hidden}#gameShell{width:min(1280px,100vw);aspect-ratio:16/9;max-height:100vh;position:relative;overflow:hidden;background:#183e48;box-shadow:0 20px 80px #0008}canvas{display:block;width:100%;height:100%;image-rendering:auto}#hud{pointer-events:none;position:absolute;inset:0;padding:22px;color:#fff;text-shadow:0 2px 2px #183946}.brand{font:900 25px/1 Georgia,serif;letter-spacing:3px;color:#fff6bd}.brand span{display:block;margin-top:2px;color:#d0f1d4;font:700 10px/1 system-ui;letter-spacing:2px}.status{position:absolute;right:22px;top:20px;display:flex;gap:8px}.status span{background:#183e48cc;border:1px solid #8dc8bc88;border-radius:18px;padding:8px 12px;font-size:13px}.tool{position:absolute;bottom:22px;left:22px;display:flex;align-items:center;gap:9px;background:#183e48dd;border:1px solid #8dc8bc88;border-radius:12px;padding:8px 14px}.tool i{font:42px Georgia;color:#f8d8ad;transform:rotate(-25deg);font-style:normal}.tool b,.tool small{display:block}.tool b{font-size:11px;letter-spacing:1px}.tool small{font-size:12px;color:#d4eee1}.keys{position:absolute;bottom:22px;right:22px;display:flex;gap:6px;pointer-events:auto}.keys button{border:1px solid #8dc8bc88;color:#fff;background:#183e48dd;border-radius:9px;padding:7px 9px;cursor:pointer;font:bold 12px system-ui}.keys small{font:600 10px system-ui;color:#c9ead9;margin-left:4px}#panel,#dialog{position:absolute;background:#fff4da;border:4px solid #fffdf2;box-shadow:0 10px 0 #173d43aa;color:#324254;border-radius:16px;padding:20px;z-index:4}#panel{top:78px;right:22px;width:290px;max-height:77%;overflow:auto}#dialog{width:min(440px,88%);left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}.hidden{display:none!important}.close{float:right;border:0;border-radius:50%;background:#e8d5b8;color:#52616c;width:27px;height:27px;font-size:18px;cursor:pointer}.panel-title{font:900 24px Georgia;margin:3px 0}.panel-sub{font-size:12px;color:#76807f;margin:0 0 12px}.card{display:flex;gap:10px;align-items:center;border-top:1px solid #e5d5bb;padding:10px 0}.card .sprite{width:34px;height:30px}.card b,.card small{display:block}.card b{font-size:13px}.card small{font-size:11px;color:#747d80}.bar{height:7px;background:#e2d6bd;border-radius:5px;margin-top:6px}.bar i{display:block;height:100%;background:#65ad83;border-radius:5px}.choice{display:flex;align-items:center;width:100%;text-align:left;padding:12px;border:1px solid #d8c6a8;background:#fffaf0;border-radius:10px;margin:7px 0;color:#354858;font:700 13px system-ui;cursor:pointer}.choice:hover{background:#eaf4dd}.choice small{display:block;font-weight:500;color:#7a8585}.choice[disabled]{opacity:.45;cursor:not-allowed}#toast{position:absolute;left:50%;bottom:100px;transform:translate(-50%,20px);opacity:0;transition:.25s;background:#173f43;color:#fff7d5;border-radius:12px;padding:10px 15px;font-weight:700;font-size:13px;z-index:5}.show{opacity:1!important;transform:translate(-50%,0)!important}@media(max-width:600px){#hud{padding:12px}.brand{font-size:18px}.status{top:11px;right:11px}.tool{bottom:10px;left:10px;padding:5px 8px}.tool i{font-size:30px}.keys{right:10px;bottom:10px}.keys small{display:none}#panel{top:60px;right:10px;width:260px}}
+:root {
+  --paper: #fff5dd;
+  --ink: #24344b;
+  --pine: #175657;
+  --gold: #ffc867;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: #142d37;
+  color: var(--ink);
+  font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+#gameShell {
+  width: min(1280px, 100vw);
+  aspect-ratio: 16 / 9;
+  max-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #183e48;
+  box-shadow: 0 20px 80px #0008;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+/* =========================================================
+   HUD
+   ========================================================= */
+
+#hud {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  padding: 22px;
+  color: #fff;
+  text-shadow: 0 2px 2px #183946;
+}
+
+.brand {
+  font: 900 25px/1 Georgia, serif;
+  letter-spacing: 3px;
+  color: #fff6bd;
+}
+
+.brand span {
+  display: block;
+  margin-top: 2px;
+  color: #d0f1d4;
+  font: 700 10px/1 system-ui;
+  letter-spacing: 2px;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status {
+  position: absolute;
+  right: 22px;
+  top: 20px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status span {
+  background: #183e48cc;
+  border: 1px solid #8dc8bc88;
+  border-radius: 18px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.status button {
+  pointer-events: auto;
+  border: 1px solid #8dc8bc88;
+  background: #183e48cc;
+  color: #dff3e7;
+  border-radius: 18px;
+  padding: 7px 10px;
+  font: 700 10px system-ui;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.status button:hover {
+  background: #285d62;
+  border-color: #b4e3d6;
+  transform: translateY(-1px);
+}
+
+.status button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   FERRAMENTA
+   ========================================================= */
+
+.tool {
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #183e48dd;
+  border: 1px solid #8dc8bc88;
+  border-radius: 12px;
+  padding: 8px 14px;
+}
+
+.tool i {
+  font: 42px Georgia;
+  color: #f8d8ad;
+  transform: rotate(-25deg);
+  font-style: normal;
+}
+
+.tool b,
+.tool small {
+  display: block;
+}
+
+.tool b {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.tool small {
+  font-size: 12px;
+  color: #d4eee1;
+}
+
+/* =========================================================
+   CONTROLES
+   ========================================================= */
+
+.keys {
+  position: absolute;
+  bottom: 22px;
+  right: 22px;
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.keys button {
+  border: 1px solid #8dc8bc88;
+  color: #fff;
+  background: #183e48dd;
+  border-radius: 9px;
+  padding: 7px 9px;
+  cursor: pointer;
+  font: bold 12px system-ui;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.keys button:hover {
+  background: #285d62;
+  transform: translateY(-1px);
+}
+
+.keys button:active {
+  transform: translateY(1px);
+}
+
+.keys small {
+  font: 600 10px system-ui;
+  color: #c9ead9;
+  margin-left: 4px;
+}
+
+/* =========================================================
+   PAINÉIS / DIÁLOGOS
+   ========================================================= */
+
+#panel,
+#dialog {
+  position: absolute;
+  background: #fff4da;
+  border: 4px solid #fffdf2;
+  box-shadow: 0 10px 0 #173d43aa;
+  color: #324254;
+  border-radius: 16px;
+  padding: 20px;
+  z-index: 4;
+}
+
+#panel {
+  top: 78px;
+  right: 22px;
+  width: 290px;
+  max-height: 77%;
+  overflow: auto;
+}
+
+#dialog {
+  width: min(440px, 88%);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================================================
+   FECHAR
+   ========================================================= */
+
+.close {
+  float: right;
+  border: 0;
+  border-radius: 50%;
+  background: #e8d5b8;
+  color: #52616c;
+  width: 27px;
+  height: 27px;
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.close:hover {
+  background: #d9c4a5;
+  transform: rotate(8deg);
+}
+
+/* =========================================================
+   TÍTULOS
+   ========================================================= */
+
+.panel-title {
+  font: 900 24px Georgia;
+  margin: 3px 0;
+}
+
+.panel-sub {
+  font-size: 12px;
+  color: #76807f;
+  margin: 0 0 12px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid #e5d5bb;
+  padding: 10px 0;
+}
+
+.card .sprite {
+  width: 34px;
+  height: 30px;
+}
+
+.card b,
+.card small {
+  display: block;
+}
+
+.card b {
+  font-size: 13px;
+}
+
+.card small {
+  font-size: 11px;
+  color: #747d80;
+}
+
+/* =========================================================
+   PROGRESSO
+   ========================================================= */
+
+.bar {
+  height: 7px;
+  background: #e2d6bd;
+  border-radius: 5px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: #65ad83;
+  border-radius: 5px;
+  transition: width 0.35s ease;
+}
+
+/* =========================================================
+   ESCOLHAS
+   ========================================================= */
+
+.choice {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid #d8c6a8;
+  background: #fffaf0;
+  border-radius: 10px;
+  margin: 7px 0;
+  color: #354858;
+  font: 700 13px system-ui;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.choice:hover {
+  background: #eaf4dd;
+  transform: translateX(2px);
+}
+
+.choice small {
+  display: block;
+  font-weight: 500;
+  color: #7a8585;
+}
+
+.choice[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+#toast {
+  position: absolute;
+  left: 50%;
+  bottom: 100px;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+
+  background: #173f43;
+  color: #fff7d5;
+  border-radius: 12px;
+  padding: 10px 15px;
+
+  font-weight: 700;
+  font-size: 13px;
+
+  z-index: 5;
+
+  pointer-events: none;
+}
+
+.show {
+  opacity: 1 !important;
+  transform: translate(-50%, 0) !important;
+}
+
+/* =========================================================
+   LOJA
+   ========================================================= */
+
+.buy {
+  border: 0;
+  border-radius: 7px;
+  background: #4a9773;
+  color: #fff;
+  padding: 7px 9px;
+  font: 700 10px system-ui;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.buy:hover {
+  background: #367b5c;
+  transform: translateY(-1px);
+}
+
+.buy:active {
+  transform: translateY(1px);
+}
+
+.buy:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-0 {
+  background: #4a9773;
+  color: #fff;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  #hud {
+    padding: 12px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .status {
+    top: 11px;
+    right: 11px;
+  }
+
+  .status span {
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+
+  .status button {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .tool {
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 8px;
+  }
+
+  .tool i {
+    font-size: 30px;
+  }
+
+  .keys {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .keys small {
+    display: none;
+  }
+
+  #panel {
+    top: 60px;
+    right: 10px;
+    width: 260px;
+  }
+}
