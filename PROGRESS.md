@@ -1,53 +1,45 @@
-# FireFly — Progresso da expansão Living World
+# FireFly — Living World
 
-Esta entrega traz a primeira grande refatoração do FireFly para uma arquitetura modular e uma IA de criaturas mais coerente com o habitat de cada espécie.
+## PR8 — Mundo + Progressão
 
-## Arquitetura
+A primeira camada completa da versão 3.0 transforma a exploração em um loop de progressão real: sair da vila, atravessar a floresta/caverna, coletar materiais, ganhar XP, fabricar equipamentos, instalar upgrades e voltar para explorar mais longe.
 
-O antigo `game.js` monolítico foi dividido em módulos ES nativos:
+### Novo loop
 
-```text
-game/
-  main.js
-  core/        constants, utils, dom, input, state, update
-  data/        dados de criaturas, raridades, missões, loja e espécies
-  systems/     save, audio, quests, shop, capture, fishing
-  entities/    creatures, player, van
-  world/       maps, scenery, spots
-  render/      world, panel, dialog, notify, draw-helpers
-```
+`Vila → expedição → coleta → criaturas/pesca → XP → retorno → crafting/upgrades → nova expedição`
 
-O `index.html` agora inicia `game/main.js` como módulo.
+### Mundo
 
-## Sistemas preservados e melhorados
+- Recursos físicos espalhados pelo mundo e diferentes por região.
+- Madeira Viva, Fibra Lunar, Cristal Ecoante, Cogumelo Luminoso e Minério Bruto.
+- Recursos reaparecem depois de um tempo, evitando mapa morto.
+- Cada material tem habitats naturais; a distribuição acompanha as regiões da floresta e os setores da caverna.
+- Recursos possuem feedback visual, partículas, áudio e interação `E`.
+- Bancada e estação de upgrades adicionadas à Vila Lumina.
 
-- Vila Lumina, Tito, loja e van.
-- Floresta Cintilante, lago e caverna.
-- Save persistente com inventário, moedas, descobertas e missão.
-- Missão do Tito com estados de aceitar, progresso, conclusão e recompensa.
-- Loja com compra real e verificação de saldo.
-- Captura com dificuldade por espécie e estado da criatura.
-- Pesca com espera, mordida, fisgada e tensão da linha.
-- Bestiário e contagem de descobertas.
-- Ciclo de dia/noite.
-- Partículas, câmera suave, transições e feedback sonoro.
+### Progressão
 
-## IA por espécie
+- XP persistente e níveis de 1 a 10.
+- Descoberta de nível com feedback visual/sonoro.
+- Mochila agora mostra materiais, equipamentos e criaturas.
+- Novo painel `P` com nível, XP, materiais, receitas e melhorias.
+- Crafting permanente: Rede Reforçada, Lanterna de Cristal, Kit de Exploração, Amuleto do Vagalume e Rede Prismática.
+- Upgrades permanentes: Bolsa Expandida, Botas de Trilha, Bagageiro da Van, Caderno de Campo e Licença de Naturalista.
+- Save migrado para versão 3 sem apagar dados anteriores.
+- Autosave periódico durante a exploração.
 
-As criaturas não usam mais um comportamento único. Borboletas procuram flores e pousam; sapos ficam na região do lago e ganham atividade à noite; lagartixas ficam camufladas e fazem disparos; aranhas permanecem nas teias; ratos fazem pequenos deslocamentos; vagalumes usam movimento orbital e desaparecem durante o dia; morcegos dormem, acordam com a aproximação do jogador e depois retornam ao teto.
+### Experiência
 
-## Validação
+A progressão foi construída para recompensar movimento e curiosidade, não apenas menus. O jogador vê um material no mundo, decide se vale a pena desviar do caminho, coleta, ganha XP e volta à vila com uma razão concreta para melhorar o equipamento.
 
-`node test/smoke.mjs` foi executado nesta entrega e passou pelos fluxos de inicialização, vila, floresta, dia/noite, pesca, caverna, captura e persistência sem exceções.
+### Validação
 
-O smoke test é uma validação de runtime; ainda é necessário testar a experiência visual diretamente no navegador após o merge.
+`test/smoke.mjs` agora cobre inicialização, mundo, geração de recursos, coleta, crafting, upgrades, pesca, caverna, captura e persistência do save v3.
 
-## Próximas evoluções
+### Próxima evolução
 
-- Expandir a floresta em regiões realmente distintas.
-- Integrar melhor a entrada da caverna ao relevo.
-- Criar van com seleção de destinos e embarque mais elaborado.
-- Tornar a vila viva com NPCs e rotina.
-- Evoluir bestiário com habitat, horários, descrições e progresso.
-- Adicionar assets licenciados de música e ambiente.
-- Expandir pesca e captura com mais espécies, ferramentas e progressão.
+- NPCs com rotina e acontecimentos.
+- Destinos desbloqueáveis da van.
+- Eventos dinâmicos e condições raras.
+- Segredos e áreas bloqueadas por ferramentas.
+- Captura 2.0 com equipamento, variantes e criaturas condicionais.
