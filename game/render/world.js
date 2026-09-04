@@ -1,41 +1,13 @@
 /* =========================================================
-   RENDER 3.0 — mundo, recursos e progressão
+   RENDER 3.1 — vila viva + eventos
    ========================================================= */
-import {ctx,ui} from '../core/dom.js';
-import {state} from '../core/state.js';
-import {W,H,MAP_LIMITS} from '../core/constants.js';
-import {save} from '../systems/save.js';
-import {quest} from '../systems/quests.js';
-import {wx,txt} from './draw-helpers.js';
-import {sky,ground,tree,lake,caveEntrance,caveWorld,house,drawVan,drawTito,flower,drawForestRocks,forestDetails} from '../world/scenery.js';
-import {drawPlayer} from '../entities/player.js';
-import {drawCreature} from '../entities/creatures.js';
-import {activeInteractable} from '../world/maps.js';
-import {nearestResource,drawResources,progressSummary} from '../systems/progression.js';
-
-export function render(){
- ctx.save();if(state.camera.shake>0)ctx.translate((Math.random()-.5)*state.camera.shake,(Math.random()-.5)*state.camera.shake);sky();ground();
- if(state.map==='village'){
-   [130,280,780,1120].forEach((x,i)=>tree(x,320,.8+(i%3)*.12,i%2));house();drawVan();drawTito();
-   for(let x=80;x<1180;x+=73)flower(x,544,x%2?'#f59b86':'#f4d477');drawVillageAtmosphere();drawVillageStations();
- }else if(state.map==='forest'){
-   const trees=[80,230,410,590,760,940,1110,1300,1490,1660,1840,2020,2200,2390,2580,2760,2940,3120,3310,3490,3670,3860,4040,4230,4420,4610,4800,4990];trees.forEach((x,i)=>tree(x,315+(i%3)*12,.68+(i%4)*.13,i%3===0));
-   lake();caveEntrance();drawForestRocks();forestDetails();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawNightMotes();drawRegionMarkers();
- }else if(state.map==='cave'){
-   caveWorld();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawCaveDust();drawCaveRegion();
- }
- drawPlayer();
- for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}
- if(state.map==='cave'){const x=wx(state.player.x),radius=save.inventory.lantern?225:110;ctx.save();ctx.fillStyle='#06121add';ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='destination-out';const g=ctx.createRadialGradient(x,state.player.y,8,x,state.player.y,radius);g.addColorStop(0,'#000');g.addColorStop(.58,'#000b');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,state.player.y,radius,0,6.28);ctx.fill();ctx.restore();}
- ctx.restore();
- const resource=nearestResource(),inter=activeInteractable();
- if(ui.prompt)ui.prompt.textContent=resource?'[E] coletar recurso':inter?'[E] '+inter.label:state.map==='forest'?'[ESPAÇO] usar rede':'Explore com calma';
- if(resource){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(resource.x)-78,resource.y-72,156,28,8);ctx.fill();txt('[E] COLETAR',wx(resource.x),resource.y-53,11,'#fff8d7','center');}
- else if(inter){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(inter.x)-90,inter.y-75,180,28,8);ctx.fill();txt('[E] '+inter.label,wx(inter.x),inter.y-56,11,'#fff8d7','center');}
- renderQuestHud();renderFishingHud();renderProgressHud();if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#102630';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
-}
+import {ctx,ui} from '../core/dom.js';import {state} from '../core/state.js';import {W,H,MAP_LIMITS} from '../core/constants.js';import {save} from '../systems/save.js';import {quest} from '../systems/quests.js';import {wx,txt} from './draw-helpers.js';import {sky,ground,tree,lake,caveEntrance,caveWorld,house,drawVan,drawTito,flower,drawForestRocks,forestDetails} from '../world/scenery.js';import {drawPlayer} from '../entities/player.js';import {drawCreature} from '../entities/creatures.js';import {activeInteractable} from '../world/maps.js';import {nearestResource,drawResources,progressSummary} from '../systems/progression.js';import {npcInfo,clockLabel} from '../systems/living-world.js';
+export function render(){ctx.save();if(state.camera.shake>0)ctx.translate((Math.random()-.5)*state.camera.shake,(Math.random()-.5)*state.camera.shake);sky();ground();if(state.map==='village'){[130,280,780,1120].forEach((x,i)=>tree(x,320,.8+(i%3)*.12,i%2));house();drawVan();drawTito();drawVillageBuildings();drawVillageNPCs();for(let x=80;x<1180;x+=73)flower(x,544,x%2?'#f59b86':'#f4d477');drawVillageAtmosphere();drawEventBanner();}else if(state.map==='forest'){const trees=[80,230,410,590,760,940,1110,1300,1490,1660,1840,2020,2200,2390,2580,2760,2940,3120,3310,3490,3670,3860,4040,4230,4420,4610,4800,4990];trees.forEach((x,i)=>tree(x,315+(i%3)*12,.68+(i%4)*.13,i%3===0));lake();caveEntrance();drawForestRocks();forestDetails();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawNightMotes();drawRegionMarkers();drawEventBanner();}else if(state.map==='cave'){caveWorld();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawCaveDust();drawCaveRegion();drawEventBanner();}drawPlayer();for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}if(state.map==='cave'){const x=wx(state.player.x),radius=save.inventory.lantern?225:110;ctx.save();ctx.fillStyle='#06121add';ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='destination-out';const g=ctx.createRadialGradient(x,state.player.y,8,x,state.player.y,radius);g.addColorStop(0,'#000');g.addColorStop(.58,'#000b');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,state.player.y,radius,0,6.28);ctx.fill();ctx.restore();}ctx.restore();const resource=nearestResource(),inter=activeInteractable();if(ui.prompt)ui.prompt.textContent=resource?'[E] coletar recurso':inter?'[E] '+inter.label:state.map==='forest'?'[ESPAÇO] usar rede':'Explore com calma';if(resource){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(resource.x)-78,resource.y-72,156,28,8);ctx.fill();txt('[E] COLETAR',wx(resource.x),resource.y-53,11,'#fff8d7','center');}else if(inter){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(inter.x)-90,inter.y-75,180,28,8);ctx.fill();txt('[E] '+inter.label,wx(inter.x),inter.y-56,11,'#fff8d7','center');}renderQuestHud();renderFishingHud();renderProgressHud();if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#102630';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
+function drawVillageBuildings(){const buildings=[['CASA DA LUNA',170,'#b46c58'],['FERREIRA DO THEO',300,'#79655a'],['PRAÇA CENTRAL',520,'#6b8b68'],['LOJINHA',680,'#b77b54'],['OFICINA',800,'#77654e'],['TAVERNA',950,'#89584e']];for(const [name,x,c] of buildings){ctx.fillStyle=c;ctx.fillRect(wx(x)-45,435,90,72);polyRoof(wx(x),435,name);txt(name,wx(x),528,7,'#fff0c7','center');}}
+function polyRoof(x,y,name){ctx.beginPath();ctx.moveTo(x-55,y);ctx.lineTo(x,y-42);ctx.lineTo(x+55,y);ctx.closePath();ctx.fillStyle='#633f42';ctx.fill();}
+function drawVillageNPCs(){for(const n of state.npcs||[]){const d=npcInfo(n.id);const x=wx(n.x),y=n.y+Math.sin(state.t*2+n.x)*1.5;ctx.save();ctx.translate(x,y);ctx.fillStyle=n.id==='luna'?'#7d8fc7':n.id==='theo'?'#8b6654':n.id==='maya'?'#c56b62':n.id==='nico'?'#4e8290':'#7568aa';ctx.beginPath();ctx.roundRect(-15,4,30,40,9);ctx.fill();ctx.fillStyle='#f1bf96';ctx.beginPath();ctx.arc(0,-12,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#3a3846';ctx.fillRect(-13,-28,26,8);if(n.id==='luna'){ctx.fillStyle='#8bbd72';ctx.fillRect(-20,17,7,20);ctx.fillRect(13,17,7,20);}if(n.id==='theo'){ctx.fillStyle='#d99c57';ctx.fillRect(9,18,16,4);}ctx.restore();txt(d.name,x,y+59,9,'#fff8d9','center');}}
+function drawEventBanner(){if(!state.worldEvent)return;ctx.fillStyle='#173f43e8';ctx.beginPath();ctx.roundRect(W/2-175,60,350,42,12);ctx.fill();txt('EVENTO · '+state.worldEvent.name,W/2,78,11,'#ffe79b','center');txt('O mundo está diferente agora — aproveite!',W/2,94,8,'#d4eadc','center');}
 function drawVillageAtmosphere(){for(let i=0;i<7;i++){const x=wx(140+i*180),y=470+Math.sin(state.t*.8+i)*4;ctx.fillStyle='#f7d98a66';ctx.beginPath();ctx.arc(x,y,3,0,6.28);ctx.fill();}}
-function drawVillageStations(){for(const [x,label] of [[790,'OFICINA'],[875,'UPGRADES']]){ctx.fillStyle='#23464acc';ctx.fillRect(wx(x)-28,475,56,44);txt(label,wx(x),465,8,'#ffe7a5','center');}}
 function drawNightMotes(){if(state.clock>.22&&state.clock<.78)return;for(let i=0;i<42;i++){const x=wx((i*173+state.t*8*(i%3+1))%Math.max(1,MAP_LIMITS.forest-100)),y=300+(i*67)%210+Math.sin(state.t*1.5+i)*12;ctx.fillStyle=i%7===0?'#d7a4ff':'#f8df75';ctx.globalAlpha=.25+.3*Math.sin(state.t*3+i);ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y,1.7+(i%2),0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;}}
 function drawRegionMarkers(){const regions=[['ENTRADA',300],['FLORES',1035],['LAGOA',1840],['TRILHA',2920],['PEDREIRA',3740],['BOSQUE ALTO',4620]];const p=state.player.x;for(const [label,xp] of regions){if(Math.abs(xp-p)<420){ctx.fillStyle='#102f35aa';ctx.beginPath();ctx.roundRect(W/2-95,78,190,28,9);ctx.fill();txt(label,W/2,97,10,'#ffe7a5','center');break;}}}
 function drawCaveRegion(){const p=state.player.x;const labels=[['BOCA DA CAVERNA',300],['GALERIA DOS ECOS',1050],['SALÃO DE CRISTAL',1900],['TÚNEIS PROFUNDOS',3000]];for(const [label,xp] of labels){if(Math.abs(xp-p)<450){txt(label,W/2,92,10,'#bde9d9','center');break;}}}
