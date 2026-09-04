@@ -1,17 +1,21 @@
 /* =========================================================
-   PAINÉIS 2.0 — mochila, bestiário e diário de missões
+   PAINÉIS 3.0 — mochila, bestiário, missões e progressão
    ========================================================= */
 import { ui } from '../core/dom.js';
 import { save } from '../systems/save.js';
 import { names, rarity, itemNames, QUESTS, speciesInfo } from '../data/game-data.js';
 import { quest } from '../systems/quests.js';
+import { progressSummary } from '../systems/progression.js';
+import { RESOURCE_TYPES, RECIPES, UPGRADES } from '../data/progression-data.js';
 
 export function panel(kind){
   if(!ui.panel)return;let body='';
   if(kind==='bag'){
-    const entries=[...Object.entries(save.inventory),...Object.entries(save.catches)].filter(([,a])=>a>0);
-    body=entries.length?entries.map(([id,amount])=>{const n=names[id]||itemNames[id]||id;return `<div class="card"><div><b>${n}</b><small>Quantidade: ${amount}</small></div></div>`;}).join(''):'<p>A mochila está vazia. Vá explorar.</p>';
-    ui.panel.innerHTML=`<button class="close">×</button><h2 class="panel-title">Mochila</h2><p class="panel-sub">Equipamentos, iscas e criaturas guardadas.</p>${body}`;
+    const resourceEntries=Object.entries(save.progression?.resources||{}).filter(([,a])=>a>0);
+    const itemEntries=Object.entries(save.inventory).filter(([,a])=>a>0);
+    const catches=Object.entries(save.catches).filter(([,a])=>a>0);
+    body=[...resourceEntries.map(([id,a])=>`<div class="card"><div><b>${RESOURCE_TYPES[id]?.icon||'•'} ${RESOURCE_TYPES[id]?.name||id}</b><small>Recursos: ${a}</small></div></div>`),...itemEntries.map(([id,a])=>`<div class="card"><div><b>${itemNames[id]||id}</b><small>Quantidade: ${a}</small></div></div>`),...catches.map(([id,a])=>`<div class="card"><div><b>${names[id]||id}</b><small>Capturas: ${a}</small></div></div>`)].join('')||'<p>A mochila está vazia. Vá explorar.</p>';
+    ui.panel.innerHTML=`<button class="close">×</button><h2 class="panel-title">Mochila</h2><p class="panel-sub">Materiais, equipamentos e criaturas.</p>${body}`;
   }
   if(kind==='book'){
     body=Object.keys(names).map(id=>{const d=!!save.discovered[id],info=speciesInfo[id]||{};return `<div class="card"><div><b>${d?names[id]:'???'}</b><small>${d?`${rarity[id]} · ${info.habitat||'desconhecido'}`:'continue explorando'}</small>${d?`<small>${info.time||''} · ${info.description||''}</small><small>Valor estimado: ${info.value||0} ✦</small>`:''}</div></div>`;}).join('');
@@ -21,6 +25,12 @@ export function panel(kind){
   if(kind==='quest'){
     const current=quest();const quests=Object.values(QUESTS);body=quests.map(q=>{const saved=save.quests[q.id]||{status:'available',progress:0};const p=Math.min(q.required,saved.progress||0);const status=saved.status==='claimed'?'Concluída':saved.status==='complete'?'Volte para '+q.giver:saved.status==='active'?`${p}/${q.required}`:'Disponível';return `<div class="card"><div><b>${q.title}</b><small>${status}</small><div class="bar"><i style="width:${Math.round(p/q.required*100)}%"></i></div><small>Recompensa: ${q.reward.coins} moedas</small></div></div>`;}).join('');
     ui.panel.innerHTML=`<button class="close">×</button><h2 class="panel-title">Diário de missões</h2><p class="panel-sub">${current.title||'Explore o mundo e converse com os moradores.'}</p>${body}`;
+  }
+  if(kind==='progress'){
+    const p=progressSummary();const res=Object.entries(save.progression.resources||{}).map(([id,n])=>`${RESOURCE_TYPES[id]?.icon||''} ${RESOURCE_TYPES[id]?.name||id}: ${n}`).join(' · ')||'Nenhum recurso coletado ainda';
+    const recipes=RECIPES.map(r=>`<div class="card"><div><b>${r.name}</b><small>Nível ${r.unlockLevel} · ${r.description}</small><small>${Object.entries(r.cost).map(([id,n])=>`${RESOURCE_TYPES[id].icon} ${n}`).join(' · ')}</small></div></div>`).join('');
+    const upgrades=UPGRADES.map(u=>`<div class="card"><div><b>${u.name}</b><small>Nível ${u.level} · ${u.cost}✦ · ${u.description}</small></div></div>`).join('');
+    ui.panel.innerHTML=`<button class="close">×</button><h2 class="panel-title">Progressão</h2><p class="panel-sub">Nível ${p.level} · ${p.xp} XP · próximo marco: ${p.next}</p><div class="bar"><i style="width:${Math.round(p.ratio*100)}%"></i></div><h3>Materiais</h3><p>${res}</p><h3>Equipamentos fabricáveis</h3>${recipes}<h3>Melhorias da expedição</h3>${upgrades}`;
   }
   ui.panel.classList.remove('hidden');const close=ui.panel.querySelector('.close');if(close)close.onclick=()=>ui.panel.classList.add('hidden');
 }
