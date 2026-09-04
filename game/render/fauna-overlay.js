@@ -1,10 +1,6 @@
-/* FireFly 4.1 — fauna visual overlay */
-import {ctx} from '../core/dom.js';
-import {state} from '../core/state.js';
-import {wx} from './draw-helpers.js';
-import {drawRegionalWildlife} from '../systems/capture-2-world.js';
-
+/* FireFly 5 — iluminação da caverna + fauna */
+import {ctx} from '../core/dom.js';import {state} from '../core/state.js';import {save} from '../systems/save.js';import {wx} from './draw-helpers.js';import {drawRegionalWildlife} from '../systems/capture-2-world.js';
 const TAU=Math.PI*2;
-function caveGlow(x,y,r,color,alpha=.35){const g=ctx.createRadialGradient(x,y,4,x,y,r);g.addColorStop(0,color);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=alpha;ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();ctx.globalAlpha=1;}
-function drawCaveFaunaLight(){if(state.map!=='cave')return;const px=wx(state.player.x),py=state.player.y-20;caveGlow(px,py,190,'#8bd8c8',.18);for(let i=0;i<7;i++){const x=wx((i*487+260)%3500);if(x<-120||x>ctx.canvas.width+120)continue;caveGlow(x,500+(i%3)*28,55,i%2?'#62d9d0':'#b895ff',.16);}ctx.save();const vignette=ctx.createRadialGradient(px,py,90,px,py,520);vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,'rgba(4,12,18,.48)');ctx.fillStyle=vignette;ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.restore();}
-export function renderFaunaOverlay(){if(state.map==='cave')drawCaveFaunaLight();for(const e of state.entities){if(e.capture2&&e.alive&&e.visible)drawRegionalWildlife(e,ctx,state.t);}}
+function light(x,y,r,color,alpha){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(.4,color.replace('1)',`${alpha})`));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();}
+function caveLighting(){if(state.map!=='cave')return;const px=wx(state.player.x),py=state.player.y-42,lantern=save.inventory?.lantern>0;ctx.save();ctx.fillStyle=lantern?'rgba(3,8,14,.28)':'rgba(3,8,14,.48)';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.globalCompositeOperation='destination-out';const radius=lantern?430:170,g=ctx.createRadialGradient(px,py,20,px,py,radius);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.9)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,radius,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';if(lantern){light(px,py,260,'rgba(255,208,116,1)',.16);ctx.strokeStyle='rgba(255,213,126,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,26+Math.sin(state.t*5)*2,0,TAU);ctx.stroke();}for(let i=0;i<7;i++){const x=wx((i*487+260)%3500);if(x<-120||x>ctx.canvas.width+120)continue;light(x,500+(i%3)*28,i%2?70:62,i%2?'rgba(70,210,200,1)':'rgba(180,130,255,1)',.16);}ctx.restore();}
+export function renderFaunaOverlay(){if(state.map==='cave')caveLighting();for(const e of state.entities){if(e.capture2&&e.alive&&e.visible)drawRegionalWildlife(e,ctx,state.t);}}
