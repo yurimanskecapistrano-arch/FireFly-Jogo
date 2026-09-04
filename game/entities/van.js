@@ -1,14 +1,21 @@
 /* =========================================================
-   VAN
+   VAN — HUB DE EXPEDIÇÃO FIREFLY 4.0
    ========================================================= */
-
-import { state } from '../core/state.js';
-import { notify } from '../render/notify.js';
-import { AudioManager } from '../systems/audio.js';
-
-export function startVan() {
-  if (state.travel) return;
-  state.travel = 1.5;
-  AudioManager.playSFX('van-door');
-  notify('A van sacode, a porta fecha...');
+import {state} from '../core/state.js';
+import {notify} from '../render/notify.js';
+import {AudioManager} from '../systems/audio.js';
+import {dialog,closeDialog} from '../render/dialog.js';
+import {beginMap} from '../world/maps.js';
+import {mapProgress,landmarkStatus,secretStatus} from '../systems/exploration.js';
+import {weatherLabel} from '../systems/weather.js';
+import {FUTURE_DESTINATIONS} from '../data/world-4-data.js';
+export function startVan(){if(state.travel)return;const knownForest=mapProgress('forest'),knownCave=mapProgress('cave');const discoveries=Object.values(state.map==='lobby'?{}:{}).length;const buttons=[
+ [`FLORESTA CINTILANTE · ${knownForest}%`,()=>depart('forest',170)],
+ [`CAVERNA ECOANTE · ${knownCave}%`,()=>depart('cave',180)],
+ ...FUTURE_DESTINATIONS.map(d=>[`${d.name} · EM BREVE`,()=>notify(`${d.name}: disponível em uma futura expedição.`)]),
+ ['FECHAR',closeDialog]
+];
+ dialog('EXPEDIÇÃO FIREFLY',`Escolha o destino. Clima atual: ${weatherLabel()}. Floresta: ${knownForest}% · Caverna: ${knownCave}%.`,buttons);
 }
+function depart(map,x){closeDialog();if(state.map===map){notify('Você já está nesta expedição.');return;}state.travel=1.5;state.travelTarget={map,x};AudioManager.playSFX('van-door');notify('Motor ligado. Preparando a expedição...');}
+export function completeVanTravel(){const target=state.travelTarget||{map:'forest',x:170};state.travel=0;state.travelTarget=null;AudioManager.playSFX('van-engine');beginMap(target.map,target.x);}
