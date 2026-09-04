@@ -1,0 +1,5 @@
+/* FireFly 5 — cola sistemas econômicos sem acoplar o loop principal */
+import {save} from './save.js';import {ensureEconomy} from './economy.js';import {addQuestProgress} from './quests.js';import {addOrderProgress} from './orders.js';
+let previousResources={},previousCatches={},previousCoins=0,booted=false;
+function snapshot(){previousResources={...(save.progression?.resources||{})};previousCatches={...(save.catches||{})};previousCoins=save.coins||0;booted=true;}
+export function updateFireFly5(){ensureEconomy();if(!booted){snapshot();return;}for(const [id,n] of Object.entries(save.progression?.resources||{})){const delta=n-(previousResources[id]||0);if(delta>0){addOrderProgress('resource',id,delta);addQuestProgress('resource',id,delta);}}for(const [key,n] of Object.entries(save.catches||{})){const delta=n-(previousCatches[key]||0);if(delta>0){const type=key.split(':')[0];addOrderProgress('catch',type,delta);addQuestProgress('catch',type,delta);}}if((save.coins||0)>previousCoins)addQuestProgress('sell','sell',1);snapshot();}
