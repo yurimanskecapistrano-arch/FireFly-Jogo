@@ -1,63 +1,19 @@
 /* =========================================================
-   AUDIO 2.0 — trilha ambiente procedural + SFX
-   Não depende de arquivos externos: funciona offline e como fallback.
+   AUDIO 2.1 — música/ambiente mais presente
    ========================================================= */
-import { save, saveGame } from './save.js';
-import { notify } from '../render/notify.js';
-
-export const AudioManager = {
-  musicVolume:.24,sfxVolume:.18,ambientVolume:.16,ctx:null,unlocked:false,assets:{},
-  master:null,musicGain:null,ambientGain:null,musicTimer:null,ambientTimer:null,currentMap:null,currentMood:'day',
-  unlock(){
-    if(!save.audioEnabled)return;
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-      if(!this.ctx){this.ctx=new AC();this.master=this.ctx.createGain();this.musicGain=this.ctx.createGain();this.ambientGain=this.ctx.createGain();this.musicGain.gain.value=this.musicVolume;this.ambientGain.gain.value=this.ambientVolume;this.musicGain.connect(this.master);this.ambientGain.connect(this.master);this.master.gain.value=.8;this.master.connect(this.ctx.destination);}
-      this.unlocked=true;if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
-      this.refreshLoops();
-    }catch(error){console.warn('FireFly: áudio indisponível.',error);}
-  },
-  tone(frequency=440,duration=.09,type='sine',volume=this.sfxVolume,destination=this.master){
-    if(!this.unlocked||!this.ctx||!save.audioEnabled)return;
-    try{const o=this.ctx.createOscillator(),g=this.ctx.createGain(),now=this.ctx.currentTime;o.type=type;o.frequency.setValueAtTime(frequency,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(.0001,volume),now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+duration);o.connect(g);g.connect(destination||this.master);o.start(now);o.stop(now+duration+.03);}catch(error){console.warn('FireFly: erro de áudio.',error);}
-  },
-  note(freq,duration=.45,delay=0,volume=.045){setTimeout(()=>this.tone(freq,duration,'triangle',volume,this.musicGain),delay*1000);},
-  wind(){this.tone(120+Math.random()*50,.32,'sine',.012,this.ambientGain);},
-  chirp(){const f=680+Math.random()*420;this.tone(f,.07,'sine',.018,this.ambientGain);setTimeout(()=>this.tone(f*1.22,.1,'sine',.014,this.ambientGain),65);},
-  water(){this.tone(280+Math.random()*120,.12,'sine',.012,this.ambientGain);},
-  playSFX(id){
-    if(!save.audioEnabled)return;
-    switch(id){
-      case'capture':this.tone(660,.08);setTimeout(()=>this.tone(880,.12),70);break;
-      case'coin':this.tone(980,.1);break;
-      case'purchase':this.tone(520,.08);setTimeout(()=>this.tone(780,.12),90);break;
-      case'quest-complete':this.tone(523,.1);setTimeout(()=>this.tone(784,.1),100);setTimeout(()=>this.tone(1046,.16),200);break;
-      case'van-door':this.tone(180,.12,'square');break;
-      case'van-engine':this.tone(90,.5,'sawtooth',.08);break;
-      case'fish':this.tone(340,.12);break;
-      case'fish-bite':this.tone(420,.06);setTimeout(()=>this.tone(300,.08),60);break;
-      case'line-snap':this.tone(180,.18,'sawtooth',.18);break;
-      case'net-swing':this.tone(240,.05,'triangle',.12);break;
-      case'error':this.tone(150,.12,'square');break;
-      case'jump':this.tone(260,.045,'triangle',.06);break;
-      case'footstep':this.tone(95,.025,'triangle',.025);break;
-      case'rare':this.note(660,.18,0,.05);this.note(880,.25,.12,.055);this.note(1320,.35,.25,.06);break;
-      default:break;
-    }
-  },
-  refreshLoops(){if(!this.unlocked||!this.ctx)return;this.stopLoops();this.startMusic();this.startAmbient();},
-  startMusic(){
-    const night=this.currentMood==='night';const cave=this.currentMap==='cave';
-    const scale=night?[196,233,262,294,349]:[220,247,294,330,392];
-    const notes=cave?[147,175,220,262,196]:scale;let i=0;
-    this.musicTimer=setInterval(()=>{if(!save.audioEnabled||!this.ctx)return;const root=notes[i++%notes.length];this.note(root,.5,0,night?.035:.045);if(i%3===0)this.note(root*1.5,.35,.12,night?.022:.028);if(i%5===0)this.note(root*2,.3,.24,.018);},night?1050:820);
-  },
-  startAmbient(){
-    const map=this.currentMap;this.ambientTimer=setInterval(()=>{if(!save.audioEnabled)return;this.wind();if(map==='forest'){if(Math.random()<.65)this.chirp();if(Math.random()<.35)this.water();}else if(map==='village'){if(Math.random()<.55)this.chirp();}else if(map==='cave'){this.tone(75+Math.random()*35,.5,'sine',.014,this.ambientGain);if(Math.random()<.35)this.tone(190+Math.random()*90,.12,'triangle',.01,this.ambientGain);}},900);
-  },
-  playMusic(map){this.currentMap=map||'village';this.refreshLoops();},
-  playAmbient(map){this.currentMap=map||this.currentMap||'village';this.refreshLoops();},
-  setTime(isNight){const mood=isNight?'night':'day';if(mood!==this.currentMood){this.currentMood=mood;this.refreshLoops();}},
-  stopLoops(){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}if(this.ambientTimer){clearInterval(this.ambientTimer);this.ambientTimer=null;}},
-  toggle(){save.audioEnabled=!save.audioEnabled;if(!save.audioEnabled)this.stopLoops();saveGame();notify(save.audioEnabled?'Som ativado':'Som desativado');if(save.audioEnabled)this.unlock();}
+import {save,saveGame} from './save.js';
+import {notify} from '../render/notify.js';
+export const AudioManager={
+ musicVolume:.42,sfxVolume:.25,ambientVolume:.28,ctx:null,unlocked:false,assets:{},master:null,musicGain:null,ambientGain:null,musicTimer:null,ambientTimer:null,currentMap:null,currentMood:'day',
+ unlock(){if(!save.audioEnabled)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!this.ctx){this.ctx=new AC();this.master=this.ctx.createGain();this.musicGain=this.ctx.createGain();this.ambientGain=this.ctx.createGain();this.musicGain.gain.value=this.musicVolume;this.ambientGain.gain.value=this.ambientVolume;this.musicGain.connect(this.master);this.ambientGain.connect(this.master);this.master.gain.value=.9;this.master.connect(this.ctx.destination);}this.unlocked=true;if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});this.refreshLoops();}catch(error){console.warn('FireFly: áudio indisponível.',error);}},
+ tone(frequency=440,duration=.09,type='sine',volume=this.sfxVolume,destination=this.master){if(!this.unlocked||!this.ctx||!save.audioEnabled)return;try{const o=this.ctx.createOscillator(),g=this.ctx.createGain(),now=this.ctx.currentTime;o.type=type;o.frequency.setValueAtTime(frequency,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(.0001,volume),now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+duration);o.connect(g);g.connect(destination||this.master);o.start(now);o.stop(now+duration+.03);}catch(error){console.warn('FireFly: erro de áudio.',error);}},
+ note(freq,duration=.45,delay=0,volume=.06){setTimeout(()=>this.tone(freq,duration,'triangle',volume,this.musicGain),delay*1000);},
+ wind(){this.tone(120+Math.random()*50,.32,'sine',.022,this.ambientGain);},
+ chirp(){const f=680+Math.random()*420;this.tone(f,.07,'sine',.032,this.ambientGain);setTimeout(()=>this.tone(f*1.22,.1,'sine',.024,this.ambientGain),65);},
+ water(){this.tone(280+Math.random()*120,.12,'sine',.026,this.ambientGain);},
+ playSFX(id){if(!save.audioEnabled)return;switch(id){case'capture':this.tone(660,.08);setTimeout(()=>this.tone(880,.12),70);break;case'coin':this.tone(980,.1);break;case'purchase':this.tone(520,.08);setTimeout(()=>this.tone(780,.12),90);break;case'quest-complete':this.tone(523,.1);setTimeout(()=>this.tone(784,.1),100);setTimeout(()=>this.tone(1046,.16),200);break;case'van-door':this.tone(180,.12,'square');break;case'van-engine':this.tone(90,.5,'sawtooth',.1);break;case'fish':this.tone(340,.12);break;case'fish-bite':this.tone(420,.06);setTimeout(()=>this.tone(300,.08),60);break;case'line-snap':this.tone(180,.18,'sawtooth',.2);break;case'net-swing':this.tone(240,.05,'triangle',.15);break;case'error':this.tone(150,.12,'square');break;case'jump':this.tone(260,.045,'triangle',.08);break;case'footstep':this.tone(95,.025,'triangle',.035);break;case'rare':this.note(660,.18,0,.07);this.note(880,.25,.12,.075);this.note(1320,.35,.25,.08);break;default:break;}},
+ refreshLoops(){if(!this.unlocked||!this.ctx)return;this.stopLoops();this.startMusic();this.startAmbient();},
+ startMusic(){const night=this.currentMood==='night',cave=this.currentMap==='cave';const day=[220,247,294,330,392,440,392,330],nocturnal=[196,233,262,294,349,392,349,294],underground=[147,175,196,220,262,196,175,147];const notes=cave?underground:night?nocturnal:day;let i=0;this.musicTimer=setInterval(()=>{if(!save.audioEnabled||!this.ctx)return;const root=notes[i++%notes.length];this.note(root,.52,0,night?.05:.065);if(i%2===0)this.note(root*1.5,.32,.11,night?.032:.04);if(i%4===0)this.note(root*2,.26,.23,.025);},night?900:700);},
+ startAmbient(){const map=this.currentMap;this.ambientTimer=setInterval(()=>{if(!save.audioEnabled)return;this.wind();if(map==='forest'){if(Math.random()<.8)this.chirp();if(Math.random()<.5)this.water();}else if(map==='village'){if(Math.random()<.65)this.chirp();}else if(map==='cave'){this.tone(75+Math.random()*35,.55,'sine',.025,this.ambientGain);if(Math.random()<.45)this.tone(190+Math.random()*90,.12,'triangle',.018,this.ambientGain);}},760);},
+ playMusic(map){this.currentMap=map||'village';this.refreshLoops();},playAmbient(map){this.currentMap=map||this.currentMap||'village';this.refreshLoops();},setTime(isNight){const mood=isNight?'night':'day';if(mood!==this.currentMood){this.currentMood=mood;this.refreshLoops();}},stopLoops(){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}if(this.ambientTimer){clearInterval(this.ambientTimer);this.ambientTimer=null;}},toggle(){save.audioEnabled=!save.audioEnabled;if(!save.audioEnabled)this.stopLoops();saveGame();notify(save.audioEnabled?'Som ativado':'Som desativado');if(save.audioEnabled)this.unlock();}
 };
