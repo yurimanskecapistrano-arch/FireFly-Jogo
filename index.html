@@ -4,64 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FireFly — Aventuras no Bosque</title>
-<link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main id="gameShell" aria-label="FireFly, jogo de exploração e captura">
     <canvas id="game" width="1280" height="720" aria-label="Mundo do FireFly"></canvas>
-<section id="hud" aria-label="Interface do jogo">
-  <div class="brand">
-    FIREFLY <span>aventuras no bosque</span>
-  </div>
-
-  <div class="status">
-    <span id="time">☀ DIA</span>
-    <span>✦ <b id="coins">25</b></span>
-    <button
-      id="mute"
-      aria-label="Ativar ou desativar som"
-    >
-      SOM
-    </button>
-  </div>
-
-  <div class="tool">
-    <i>⌒</i>
-
-    <div>
-      <b>REDE DE FIOS</b>
-      <small id="prompt">
-        Explore a vila
-      </small>
-    </div>
-  </div>
-
-  <div class="keys">
-    <button data-panel="bag">
-      I <small>Mochila</small>
-    </button>
-
-    <button data-panel="book">
-      B <small>Bestiário</small>
-    </button>
-
-    <button data-panel="quest">
-      M <small>Missões</small>
-    </button>
-  </div>
-</section>
-
-<aside
-  id="panel"
-  class="hidden"
-></aside>
-
-<div
-  id="dialog"
-  class="hidden"
-></div>
+    <section id="hud" aria-label="Interface do jogo">
+      <div class="brand">FIREFLY <span>aventuras no bosque</span></div>
+      <div class="status">
+        <span id="time">☀ DIA</span>
+        <span>✦ <b id="coins">25</b></span>
+        <button id="mute" aria-label="Ativar ou desativar som">SOM</button>
+      </div>
+      <div class="tool"><i>⌒</i><div><b>REDE DE FIOS</b><small id="prompt">Explore a vila</small></div></div>
+      <div class="keys">
+        <button data-panel="bag">I <small>Mochila</small></button>
+        <button data-panel="book">B <small>Bestiário</small></button>
+        <button data-panel="quest">M <small>Missões</small></button>
+      </div>
+    </section>
+    <aside id="panel" class="hidden"></aside>
+    <div id="dialog" class="hidden"></div>
     <div id="toast" role="status"></div>
   </main>
-  <script src="game.js"></script>
+  <script type="module" src="game/main.js"></script>
 </body>
 </html>
