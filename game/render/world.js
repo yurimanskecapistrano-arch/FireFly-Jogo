@@ -1,25 +1,96 @@
 /* =========================================================
-   RENDER 3.3 — lobby + Vila Lumina polida
+   RENDER 3.4 — lobby + Vila Lumina totalmente separados
    ========================================================= */
 import {ctx,ui} from '../core/dom.js';import {state} from '../core/state.js';import {W,H,MAP_LIMITS} from '../core/constants.js';import {save} from '../systems/save.js';import {quest} from '../systems/quests.js';import {wx,txt,poly} from './draw-helpers.js';import {sky,ground,tree,lake,caveEntrance,caveWorld,drawVan,drawTito,flower,drawForestRocks,forestDetails} from '../world/scenery.js';import {drawPlayer} from '../entities/player.js';import {drawCreature} from '../entities/creatures.js';import {activeInteractable} from '../world/maps.js';import {nearestResource,drawResources,progressSummary} from '../systems/progression.js';import {npcInfo,clockLabel} from '../systems/living-world.js';
 const TAU=Math.PI*2;
-export function render(){ctx.save();sky();ground();if(state.map==='lobby')drawLobby();else if(state.map==='village')drawVillage();else if(state.map==='forest')drawForest();else if(state.map==='cave')drawCave();drawPlayer();for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}if(state.map==='cave')drawDarkness();ctx.restore();drawInteraction();renderQuestHud();renderFishingHud();renderProgressHud();if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#102630';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
-function drawLobby(){for(const x of [110,330,1030,1190])tree(x,330,.72,x%2);path(70,560,1210);building(560,420,170,92,'LOJINHA','shop');building(790,420,210,92,'GARAGEM FIREFLY','van');drawVan();ctx.fillStyle='#7c9b65';ctx.fillRect(wx(970),438,150,8);txt('PONTO DE PARTIDA',wx(380),395,10,'#fff1c9','center');gate(1150,515,'← VILA LUMINA');txt('Pegue a van para explorar a floresta',wx(790),555,9,'#e9edcf','center');}
-function drawVillage(){road(70,1160,552);sidewalk(70,1160,505);building(180,380,190,105,'CASA DA LUNA','luna');building(470,360,210,125,'PRAÇA CENTRAL','square');building(780,380,190,105,'FERREIRA DO THEO','theo');building(1050,380,170,105,'MERCADO','maya');building(1390,380,190,105,'TAVERNA','nico');building(1690,380,150,105,'OFICINA','craft');for(const x of [110,350,710,1010,1280,1580,1800])tree(x,310,.55,x%2);for(let x=90;x<1860;x+=145)flower(x,570,x%2?'#f3b071':'#b7d887');drawVillageNPCs3();gate(70,515,'← ACAMPAMENTO');txt('VILA LUMINA',950,335,16,'#fff0bd','center');txt('uma pequena cidade viva',950,351,9,'#d6e5d0','center');}
+
+export function render(){
+  ctx.save();
+  sky();
+  if(state.map==='lobby')drawLobbyScene();
+  else if(state.map==='village')drawVillageScene();
+  else {ground();if(state.map==='forest')drawForest();else if(state.map==='cave')drawCave();}
+  drawPlayer();
+  for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}
+  if(state.map==='cave')drawDarkness();
+  ctx.restore();
+  drawInteraction();renderQuestHud();renderFishingHud();renderProgressHud();
+  if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#102630';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+}
+
+/* Cada mapa pinta sua própria base. Nenhum chão, árvore ou prédio do
+   acampamento é reutilizado visualmente pela Vila Lumina. */
+function drawLobbyScene(){
+  drawLobbyGround();
+  for(const [x,y,s,v] of [[110,350,.72,0],[330,345,.64,1],[1030,350,.72,0],[1190,350,.64,1]])tree(x,y,s,v);
+  path(70,1210,560);
+  building(560,420,170,92,'LOJINHA','shop');
+  building(790,420,210,92,'GARAGEM FIREFLY','van');
+  drawVan();
+  ctx.fillStyle='#7c9b65';ctx.fillRect(wx(970),438,150,8);
+  txt('PONTO DE PARTIDA',wx(380),395,10,'#fff1c9','center');
+  gate(1150,515,'← VILA LUMINA');
+  txt('Pegue a van para explorar a floresta',wx(790),555,9,'#e9edcf','center');
+}
+
+function drawLobbyGround(){
+  ctx.fillStyle='#315744';ctx.fillRect(0,425,W,H-425);
+  ctx.fillStyle='#56815a';ctx.fillRect(0,462,W,H-462);
+  for(let i=0;i<16;i++){const x=wx((i*211)%1250);ctx.fillStyle=i%2?'#6d995f44':'#254e4528';ctx.beginPath();ctx.ellipse(x,520+(i%4)*22,95+(i%3)*20,22,0,0,TAU);ctx.fill();}
+  for(let x=-10;x<W+30;x+=27){ctx.strokeStyle='#84ad6c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,466);ctx.lineTo(x+4,456+Math.sin(state.t+x)*2);ctx.lineTo(x+8,465);ctx.stroke();}
+}
+
+function drawVillageScene(){
+  drawVillageGround();
+  drawVillageBuildings();
+  drawVillageTrees();
+  drawVillageFlowers();
+  drawVillageNPCs3();
+  gate(65,515,'← ACAMPAMENTO');
+  txt('VILA LUMINA',950,330,18,'#fff0bd','center');
+  txt('uma pequena cidade viva',950,348,9,'#d6e5d0','center');
+}
+
+function drawVillageGround(){
+  ctx.fillStyle='#6e9460';ctx.fillRect(0,425,W,H-425);
+  ctx.fillStyle='#82a96a';ctx.fillRect(0,472,W,H-472);
+  for(let x=0;x<W;x+=34){ctx.fillStyle=x%68?'#9abc7b44':'#527b5744';ctx.fillRect(x,488+(x%5)*11,18,2);}
+  road(70,1840,555);
+  sidewalk(70,1840,505);
+  /* pequenas praças de grama entre os lotes */
+  for(const x of [165,365,705,1005,1285,1585,1790]){ctx.fillStyle='#739a6044';ctx.beginPath();ctx.ellipse(wx(x),470,72,18,0,0,TAU);ctx.fill();}
+}
+
+function drawVillageBuildings(){
+  building(180,382,180,100,'CASA DA LUNA','luna');
+  building(470,362,190,122,'PRAÇA CENTRAL','square');
+  building(780,382,180,100,'FERREIRA DO THEO','theo');
+  building(1050,382,165,100,'MERCADO','maya');
+  building(1390,382,185,100,'TAVERNA','nico');
+  building(1690,382,145,100,'OFICINA','craft');
+}
+
+function drawVillageTrees(){
+  /* Árvores ficam nas bordas dos lotes, com a base encostando no gramado.
+     Nenhuma árvore do acampamento é desenhada aqui. */
+  for(const [x,y,s,v] of [[85,360,.52,0],[300,355,.48,1],[670,350,.5,0],[930,355,.46,1],[1195,350,.5,0],[1515,355,.48,1],[1810,355,.52,0]])tree(x,y,s,v);
+}
+function drawVillageFlowers(){for(let x=105;x<1850;x+=118)flower(x,548,x%2?'#f3b071':'#b7d887');}
+
 function drawForest(){const trees=[80,230,410,590,760,940,1110,1300,1490,1660,1840,2020,2200,2390,2580,2760,2940,3120,3310,3490,3670,3860,4040,4230,4420,4610,4800,4990];trees.forEach((x,i)=>tree(x,315+(i%3)*12,.68+(i%4)*.13,i%3===0));lake();caveEntrance();drawForestRocks();forestDetails();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawNightMotes();drawRegionMarkers();}
 function drawCave(){caveWorld();drawResources(ctx,wx);state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));drawCaveDust();drawCaveRegion();}
 function path(a,b,y){ctx.fillStyle='#c5a77b';ctx.fillRect(wx(a),y-26,b-a,52);for(let x=a;x<b;x+=48){ctx.fillStyle='#d6bc91';ctx.fillRect(wx(x),y-2,28,3);}}
-function road(a,b,y){ctx.fillStyle='#b7986c';ctx.fillRect(wx(a),y-48,b-a,96);ctx.fillStyle='#d8c29a';ctx.fillRect(wx(a),y-48,b-a,8);ctx.fillRect(wx(a),y+40,b-a,8);for(let x=a+25;x<b;x+=80){ctx.fillStyle='#a88860';ctx.fillRect(wx(x),y-2,42,4);}}
+function road(a,b,y){ctx.fillStyle='#a98b69';ctx.fillRect(wx(a),y-48,b-a,96);ctx.fillStyle='#d9c9a9';ctx.fillRect(wx(a),y-48,b-a,8);ctx.fillRect(wx(a),y+40,b-a,8);for(let x=a+25;x<b;x+=80){ctx.fillStyle='#8d7258';ctx.fillRect(wx(x),y-2,42,4);}}
 function sidewalk(a,b,y){ctx.fillStyle='#d8c7a4';ctx.fillRect(wx(a),y-73,b-a,20);ctx.fillRect(wx(a),y+53,b-a,20);}
-function building(x,y,w,h,label,kind){const X=wx(x);ctx.fillStyle='#e3a06b';ctx.fillRect(X-w/2,y,w,h);ctx.fillStyle=kind==='shop'?'#b96f59':kind==='van'?'#5e7180':kind==='theo'?'#786050':kind==='maya'?'#b87857':'#87604f';ctx.beginPath();ctx.moveTo(X-w/2-12,y);ctx.lineTo(X,y-42);ctx.lineTo(X+w/2+12,y);ctx.closePath();ctx.fill();ctx.fillStyle='#6d5147';ctx.fillRect(X-15,y+45,30,h-45);ctx.fillStyle='#9bd0d1';ctx.fillRect(X-w*.28,y+24,30,23);ctx.fillRect(X+w*.1,y+24,30,23);txt(label,X,y+15,9,'#fff1c8','center');}
-function gate(x,y,label){const X=wx(x);ctx.fillStyle='#694f3f';ctx.fillRect(X-42,y-45,10,70);ctx.fillRect(X+32,y-45,10,70);ctx.strokeStyle='#d8c29a';ctx.lineWidth=7;ctx.beginPath();ctx.arc(X,y-28,38,Math.PI,TAU);ctx.stroke();ctx.fillStyle='#263f42dd';ctx.roundRect(X-95,y-86,190,30,8);ctx.fill();txt(label,X,y-66,11,'#fff0bb','center');}
+function building(x,y,w,h,label,kind){const X=wx(x);ctx.fillStyle='#e3a06b';ctx.fillRect(X-w/2,y,w,h);ctx.fillStyle=kind==='shop'?'#b96f59':kind==='van'?'#5e7180':kind==='theo'?'#786050':kind==='maya'?'#b87857':kind==='craft'?'#6f594e':'#87604f';ctx.beginPath();ctx.moveTo(X-w/2-12,y);ctx.lineTo(X,y-42);ctx.lineTo(X+w/2+12,y);ctx.closePath();ctx.fill();ctx.fillStyle='#6d5147';ctx.fillRect(X-15,y+45,30,h-45);ctx.fillStyle='#9bd0d1';ctx.fillRect(X-w*.28,y+24,30,23);ctx.fillRect(X+w*.1,y+24,30,23);txt(label,X,y+15,9,'#fff1c8','center');}
+function gate(x,y,label){const X=wx(x);ctx.fillStyle='#694f3f';ctx.fillRect(X-42,y-45,10,70);ctx.fillRect(X+32,y-45,10,70);ctx.strokeStyle='#d8c29a';ctx.lineWidth=7;ctx.beginPath();ctx.arc(X,y-28,38,Math.PI,TAU);ctx.stroke();ctx.fillStyle='#263f42dd';ctx.beginPath();ctx.roundRect(X-95,y-86,190,30,8);ctx.fill();txt(label,X,y-66,11,'#fff0bb','center');}
 function drawVillageNPCs3(){for(const n of state.npcs||[]){const d=npcInfo(n.id);const x=wx(n.x),y=n.y;ctx.save();ctx.translate(x,y);ctx.fillStyle=n.id==='luna'?'#788dc5':n.id==='theo'?'#806151':n.id==='maya'?'#c06b61':n.id==='nico'?'#4d8790':'#7568aa';ctx.beginPath();ctx.roundRect(-15,2,30,42,9);ctx.fill();ctx.fillStyle='#f1bf96';ctx.beginPath();ctx.arc(0,-14,15,0,TAU);ctx.fill();ctx.fillStyle='#403744';ctx.fillRect(-13,-29,26,8);if(n.id==='luna'){ctx.fillStyle='#8bbd72';ctx.fillRect(-22,18,8,18);ctx.fillRect(14,18,8,18);}if(n.id==='theo'){ctx.fillStyle='#d99c57';ctx.fillRect(9,17,18,5);}if(n.id==='maya'){ctx.fillStyle='#f2d16f';ctx.fillRect(-24,18,48,4);}if(n.id==='nico'){ctx.strokeStyle='#d8c49c';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(14,12);ctx.lineTo(30,-15);ctx.stroke();}ctx.restore();txt(d.name,x,y+61,9,'#fff8d9','center');}}
 function drawNightMotes(){if(state.clock>.22&&state.clock<.78)return;for(let i=0;i<42;i++){const x=wx((i*173+state.t*8*(i%3+1))%Math.max(1,MAP_LIMITS.forest-100)),y=300+(i*67)%210+Math.sin(state.t*1.5+i)*12;ctx.fillStyle=i%7===0?'#d7a4ff':'#f8df75';ctx.globalAlpha=.25+.3*Math.sin(state.t*3+i);ctx.beginPath();ctx.arc(x,y,1.7+(i%2),0,TAU);ctx.fill();ctx.globalAlpha=1;}}
-function drawRegionMarkers(){const regions=[['ENTRADA',300],['FLORES',1035],['LAGOA',1840],['TRILHA',2920],['PEDREIRA',3740],['BOSQUE ALTO',4620]];const p=state.player.x;for(const [label,xp] of regions)if(Math.abs(xp-p)<420){ctx.fillStyle='#102f35aa';ctx.roundRect(W/2-95,78,190,28,9);ctx.fill();txt(label,W/2,97,10,'#ffe7a5','center');break;}}
+function drawRegionMarkers(){const regions=[['ENTRADA',300],['FLORES',1035],['LAGOA',1840],['TRILHA',2920],['PEDREIRA',3740],['BOSQUE ALTO',4620]];const p=state.player.x;for(const [label,xp] of regions)if(Math.abs(xp-p)<420){ctx.fillStyle='#102f35aa';ctx.beginPath();ctx.roundRect(W/2-95,78,190,28,9);ctx.fill();txt(label,W/2,97,10,'#ffe7a5','center');break;}}
 function drawCaveRegion(){const p=state.player.x;const labels=[['BOCA DA CAVERNA',300],['GALERIA DOS ECOS',1050],['SALÃO DE CRISTAL',1900],['TÚNEIS PROFUNDOS',3000]];for(const [label,xp] of labels)if(Math.abs(xp-p)<450){txt(label,W/2,92,10,'#bde9d9','center');break;}}
 function drawCaveDust(){for(let i=0;i<28;i++){const x=(i*107+state.t*3)%W,y=150+(i*53)%470;ctx.fillStyle='#b7d8d055';ctx.beginPath();ctx.arc(x,y,1+(i%2),0,TAU);ctx.fill();}}
 function drawDarkness(){const x=wx(state.player.x),radius=save.inventory.lantern?225:110;ctx.save();ctx.fillStyle='#06121add';ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='destination-out';const g=ctx.createRadialGradient(x,state.player.y,8,x,state.player.y,radius);g.addColorStop(0,'#000');g.addColorStop(.58,'#000b');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,state.player.y,radius,0,TAU);ctx.fill();ctx.restore();}
-function drawInteraction(){const resource=nearestResource(),inter=activeInteractable();if(ui.prompt)ui.prompt.textContent=resource?'[E] coletar recurso':inter?'[E] '+inter.label:state.map==='forest'?'[ESPAÇO] usar rede':'Explore com calma';if(resource){ctx.fillStyle='#173f43dd';ctx.roundRect(wx(resource.x)-78,resource.y-72,156,28,8);ctx.fill();txt('[E] COLETAR',wx(resource.x),resource.y-53,11,'#fff8d7','center');}else if(inter){ctx.fillStyle='#173f43dd';ctx.roundRect(wx(inter.x)-105,inter.y-75,210,30,8);ctx.fill();txt('[E] '+inter.label,wx(inter.x),inter.y-56,10,'#fff8d7','center');}}
-function renderQuestHud(){const q=quest();if(q.status!=='active'&&q.status!=='complete')return;ctx.fillStyle='#173f43dd';ctx.roundRect(20,100,210,58,10);ctx.fill();txt('MISSÃO · TITO',32,121,11,'#fbe7a7');txt(q.status==='complete'?'✓ Volte para Tito':q.title,32,142,12,'#fff');txt(q.status==='complete'?'Recompensa pronta':`${q.progress} / ${q.required}`,196,142,11,'#ffe86f','right');}
-function renderFishingHud(){const f=state.fishing;if(!f||f.stage!=='reel')return;const x=W/2-100,y=H-78;ctx.fillStyle='#173f43ee';ctx.roundRect(x,y,200,48,11);ctx.fill();txt('TENSÃO DA LINHA',x+100,y+15,10,'#fbe7a7','center');ctx.fillStyle='#0d2a2c';ctx.fillRect(x+14,y+22,172,10);ctx.fillStyle='#5aa8c9';ctx.fillRect(x+14+172*.4,y+22,172*.38,10);ctx.fillStyle=f.tension>.78||f.tension<.2?'#ff8a6b':'#ffe86f';ctx.fillRect(x+14+172*f.tension-2,y+20,4,14);ctx.fillStyle='#7bcf9b';ctx.fillRect(x+14,y+35,172*f.progress,4);txt('ESPAÇO · manter a tensão',x+100,y+46,8,'#cce8d8','center');}
-function renderProgressHud(){const p=progressSummary();ctx.fillStyle='#173f43dd';ctx.roundRect(W-224,100,204,54,10);ctx.fill();txt(`NÍVEL ${p.level}`,W-212,121,11,'#fbe7a7');ctx.fillStyle='#0d2a2c';ctx.fillRect(W-212,130,176,7);ctx.fillStyle='#ffe86f';ctx.fillRect(W-212,130,176*p.ratio,7);txt(`${p.xp} XP`,W-36,121,10,'#fff','right');}
+function drawInteraction(){const resource=nearestResource(),inter=activeInteractable();if(ui.prompt)ui.prompt.textContent=resource?'[E] coletar recurso':inter?'[E] '+inter.label:state.map==='forest'?'[ESPAÇO] usar rede':'Explore com calma';if(resource){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(resource.x)-78,resource.y-72,156,28,8);ctx.fill();txt('[E] COLETAR',wx(resource.x),resource.y-53,11,'#fff8d7','center');}else if(inter){ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(wx(inter.x)-105,inter.y-75,210,30,8);ctx.fill();txt('[E] '+inter.label,wx(inter.x),inter.y-56,10,'#fff8d7','center');}}
+function renderQuestHud(){const q=quest();if(q.status!=='active'&&q.status!=='complete')return;ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(20,100,210,58,10);ctx.fill();txt('MISSÃO · TITO',32,121,11,'#fbe7a7');txt(q.status==='complete'?'✓ Volte para Tito':q.title,32,142,12,'#fff');txt(q.status==='complete'?'Recompensa pronta':`${q.progress} / ${q.required}`,196,142,11,'#ffe86f','right');}
+function renderFishingHud(){const f=state.fishing;if(!f||f.stage!=='reel')return;const x=W/2-100,y=H-78;ctx.fillStyle='#173f43ee';ctx.beginPath();ctx.roundRect(x,y,200,48,11);ctx.fill();txt('TENSÃO DA LINHA',x+100,y+15,10,'#fbe7a7','center');ctx.fillStyle='#0d2a2c';ctx.fillRect(x+14,y+22,172,10);ctx.fillStyle='#5aa8c9';ctx.fillRect(x+14+172*.4,y+22,172*.38,10);ctx.fillStyle=f.tension>.78||f.tension<.2?'#ff8a6b':'#ffe86f';ctx.fillRect(x+14+172*f.tension-2,y+20,4,14);ctx.fillStyle='#7bcf9b';ctx.fillRect(x+14,y+35,172*f.progress,4);txt('ESPAÇO · manter a tensão',x+100,y+46,8,'#cce8d8','center');}
+function renderProgressHud(){const p=progressSummary();ctx.fillStyle='#173f43dd';ctx.beginPath();ctx.roundRect(W-224,100,204,54,10);ctx.fill();txt(`NÍVEL ${p.level}`,W-212,121,11,'#fbe7a7');ctx.fillStyle='#0d2a2c';ctx.fillRect(W-212,130,176,7);ctx.fillStyle='#ffe86f';ctx.fillRect(W-212,130,176*p.ratio,7);txt(`${p.xp} XP`,W-36,121,10,'#fff','right');}
