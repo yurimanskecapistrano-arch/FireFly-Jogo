@@ -1,35 +1,8 @@
-/* =========================================================
-   QUEST SYSTEM
-   ========================================================= */
-
-import { save, saveGame } from './save.js';
-import { state, addParticles } from '../core/state.js';
-import { QUESTS } from '../data/game-data.js';
-import { dialog, closeDialog } from '../render/dialog.js';
-import { notify } from '../render/notify.js';
-import { AudioManager } from './audio.js';
-
-export function quest() {
-  if (!save.quests.tito_frogs) save.quests.tito_frogs = { status: 'available', progress: 0 };
-  return save.quests.tito_frogs;
-}
-
-export function acceptQuest() {
-  const q = quest(); q.status = 'active'; q.progress = 0; saveGame(); closeDialog(); notify('Missão aceita: capture 3 sapos.'); AudioManager.playSFX('coin');
-}
-
-export function claimQuest() {
-  const q = quest(); const definition = QUESTS.tito_frogs;
-  if (q.status !== 'complete') return;
-  q.status = 'claimed'; save.coins += definition.reward.coins;
-  for (const [item, amount] of Object.entries(definition.reward.items)) save.inventory[item] = (save.inventory[item] || 0) + amount;
-  saveGame(); closeDialog(); addParticles(state.player.x, state.player.y, '#ffd66e', 28); notify('MISSÃO CONCLUÍDA! +50 moedas, +1 Isca'); AudioManager.playSFX('quest-complete');
-}
-
-export function titoDialog() {
-  const q = quest();
-  if (q.status === 'available') { dialog('Tito, inventor de redes', 'Ei! Você viu quantos sapos apareceram perto da floresta? Me traz 3 sapos e eu te dou umas moedas.', [['ACEITAR', acceptQuest], ['AINDA NÃO', closeDialog]]); return; }
-  if (q.status === 'active') { dialog('Tito', 'Estou ouvindo a lagoa daqui. Sapos encontrados: ' + q.progress + ' / 3.', [['VOLTAR', closeDialog]]); return; }
-  if (q.status === 'complete') { dialog('Tito', 'Você conseguiu! Caramba, esses sapos são rápidos. Vamos acertar sua recompensa.', [['ENTREGAR SAPOS', claimQuest]]); return; }
-  dialog('Tito', 'A rede parece feliz com você por perto. Obrigado pela ajuda com a lagoa!', [['TCHAU', closeDialog]]);
-}
+/* FireFly 5 — missões de todos os moradores */
+import {save,saveGame} from '../systems/save.js';import {state,addParticles} from '../core/state.js';import {QUESTS} from '../data/game-data.js';import {dialog,closeDialog} from '../render/dialog.js';import {notify} from '../render/notify.js';import {AudioManager} from './audio.js';import {addXp} from './progression.js';
+export function quest(id='tito_frogs'){if(!save.quests[id])save.quests[id]={status:'available',progress:0};return save.quests[id];}
+export function addQuestProgress(kind,target,amount=1){let changed=false;for(const d of Object.values(QUESTS)){const q=quest(d.id);if(q.status!=='active'||d.kind!==kind||d.target!==target)continue;q.progress=Math.min(d.required,q.progress+amount);changed=true;if(q.progress>=d.required){q.status='complete';notify(`✓ Missão pronta: ${d.title}. Procure ${d.giver}.`);AudioManager.playSFX('success');}}if(changed)saveGame();}
+export function acceptQuest(id){const q=quest(id);q.status='active';q.progress=0;saveGame();closeDialog();notify(`MISSÃO ACEITA · ${QUESTS[id].title}`);AudioManager.playSFX('coin');}
+export function claimQuest(id){const d=QUESTS[id],q=quest(id);if(!d||q.status!=='complete')return false;q.status='claimed';save.coins+=d.reward.coins;for(const [item,amount] of Object.entries(d.reward.items||{}))save.inventory[item]=(save.inventory[item]||0)+amount;addXp(25+d.required*5,'missão');saveGame();closeDialog();addParticles(state.player.x,state.player.y,'#ffd66e',28);notify(`MISSÃO CONCLUÍDA · +${d.reward.coins}✦`);AudioManager.playSFX('quest-complete');return true;}
+export function npcMissionDialog(id){const list=Object.values(QUESTS).filter(d=>d.giver===id);const d=list.find(v=>quest(v.id).status==='active')||list.find(v=>quest(v.id).status==='complete')||list.find(v=>quest(v.id).status==='available');if(!d){dialog('Sem pedidos','Volte mais tarde.',[['FECHAR',closeDialog]]);return;}const q=quest(d.id),p=Math.min(d.required,q.progress||0),who={luna:'Luna',theo:'Theo',maya:'Maya',nico:'Nico',tito:'Tito'}[id]||id;if(q.status==='available'){dialog(who,d.title+' — '+d.text,[['ACEITAR',()=>acceptQuest(d.id)],['AGORA NÃO',closeDialog]]);return;}if(q.status==='active'){dialog(who,d.title,d.text+' Progresso: '+p+'/'+d.required+'.',[['VOLTAR',closeDialog]]);return;}if(q.status==='complete'){dialog(who,d.title,'Está tudo pronto. Vamos acertar sua recompensa.',[['ENTREGAR',()=>claimQuest(d.id)]]);return;}dialog(who,'Obrigado. Tenho outro trabalho quando você estiver pronto.',[['FECHAR',closeDialog]]);}
+export function titoDialog(){npcMissionDialog('tito');}
