@@ -1,29 +1,5 @@
-/* =========================================================
-   LOJA
-   ========================================================= */
-
-import { save, saveGame } from './save.js';
-import { state, addParticles } from '../core/state.js';
-import { SHOP } from '../data/game-data.js';
-import { ui } from '../core/dom.js';
-import { closeDialog } from '../render/dialog.js';
-import { notify } from '../render/notify.js';
-import { AudioManager } from './audio.js';
-
-export function shopDialog() {
-  const rows = SHOP.map(([id, name, description, price]) => {
-    const owned = save.inventory[id] || 0; const canBuy = save.coins >= price;
-    return `<div class="card"><div><b>${name}</b><small>${description}</small><small>${price} moedas · possui ${owned}</small></div><button class="buy" data-buy="${id}" ${canBuy ? '' : 'disabled'}>COMPRAR</button></div>`;
-  }).join('');
-  ui.dialog.innerHTML = `<button class="close">×</button><h2>Lojinha da Lumina</h2><p>Ferramentas honestas. Preços mais ou menos.</p><p><b>✦ ${save.coins} moedas</b></p>${rows}`;
-  ui.dialog.classList.remove('hidden');
-  const closeButton = ui.dialog.querySelector('.close'); if (closeButton) closeButton.onclick = closeDialog;
-  ui.dialog.querySelectorAll('[data-buy]').forEach((button) => { button.onclick = () => buy(button.dataset.buy); });
-}
-
-export function buy(id) {
-  const item = SHOP.find((entry) => entry[0] === id); if (!item) return;
-  const [itemId, itemName, , price] = item;
-  if (save.coins < price) { notify('Você não tem moedas suficientes.'); AudioManager.playSFX('error'); return; }
-  save.coins -= price; save.inventory[itemId] = (save.inventory[itemId] || 0) + 1; saveGame(); addParticles(state.player.x, state.player.y, '#ffd66e', 10); AudioManager.playSFX('purchase'); notify('COMPRADO! +1 ' + itemName); shopDialog();
-}
+/* FireFly 5 — loja evolutiva + compra/venda */
+import {save,saveGame} from './save.js';import {ui} from '../core/dom.js';import {closeDialog} from '../render/dialog.js';import {shopCatalog,economySummary,buyShopItem,sellResource,sellCatch} from './economy.js';import {SHOP_TIERS,ECONOMY_ITEMS} from '../data/economy-data.js';
+let mode='buy';
+export function shopDialog(next='buy'){mode=next;const e=economySummary(),tier=SHOP_TIERS[e.tier-1],catalog=shopCatalog();let body='';if(mode==='buy'){body=catalog.map(i=>`<div class="card"><div><b>${i.name}</b><small>${i.price}✦ · possui ${save.inventory[i.id]||0}</small></div><button class="buy" data-buy="${i.id}" data-price="${i.price}">COMPRAR</button></div>`).join('');}else{const rs=Object.entries(save.progression?.resources||{}).filter(([,n])=>n>0),cs=Object.entries(save.catches||{}).filter(([,n])=>n>0);body='<h3>Materiais</h3>'+rs.map(([id,n])=>{const d=ECONOMY_ITEMS[id];return `<div class="card"><div><b>${d?.icon||'•'} ${d?.name||id}</b><small>${n} disponíveis · ${d?.sell||0}✦ cada</small></div><button class="buy" data-sr="${id}">VENDER</button></div>`}).join('')+'<h3>Capturas</h3>'+cs.map(([key,n])=>{const d=ECONOMY_ITEMS[key.split(':')[0]];return `<div class="card"><div><b>${d?.icon||'•'} ${d?.name||key}${key.includes(':')?' ✦ variante':''}</b><small>${n} disponíveis</small></div><button class="buy" data-sc="${key}">VENDER</button></div>`}).join('');if(!rs.length&&!cs.length)body+='<p>Você ainda não tem nada para vender.</p>';}ui.dialog.innerHTML=`<button class="close">×</button><h2>Mercado Lumina</h2><p><b>✦ ${save.coins}</b> · ${tier.name} · Reputação ${e.rep}</p><p class="panel-sub">Próximo nível: ${SHOP_TIERS[e.tier]?.unlock||'nível máximo'}</p><button class="choice ${mode==='buy'?'action-0':''}" data-mode="buy">COMPRAR</button><button class="choice ${mode==='sell'?'action-0':''}" data-mode="sell">VENDER</button>${body}`;ui.dialog.classList.remove('hidden');ui.dialog.querySelector('.close').onclick=closeDialog;ui.dialog.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>shopDialog(b.dataset.mode));ui.dialog.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{buyShopItem(b.dataset.buy,Number(b.dataset.price));shopDialog('buy');});ui.dialog.querySelectorAll('[data-sr]').forEach(b=>b.onclick=()=>{sellResource(b.dataset.sr,1);shopDialog('sell');});ui.dialog.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{sellCatch(b.dataset.sc,1);shopDialog('sell');});}
+export function buy(id){const i=shopCatalog().find(v=>v.id===id);return i?buyShopItem(id,i.price):false;}
