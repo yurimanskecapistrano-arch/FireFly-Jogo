@@ -1,51 +1,63 @@
 /* =========================================================
-   AUDIO
+   AUDIO 2.0 — trilha ambiente procedural + SFX
+   Não depende de arquivos externos: funciona offline e como fallback.
    ========================================================= */
-
 import { save, saveGame } from './save.js';
 import { notify } from '../render/notify.js';
 
 export const AudioManager = {
-  musicVolume: 0.35, sfxVolume: 0.2, ambientVolume: 0.25, ctx: null, unlocked: false, assets: {},
-  unlock() {
-    if (this.unlocked || !save.audioEnabled) return;
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      this.ctx = new AudioContext(); this.unlocked = true;
-      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
-    } catch (error) { console.warn('FireFly: áudio indisponível.', error); }
+  musicVolume:.24,sfxVolume:.18,ambientVolume:.16,ctx:null,unlocked:false,assets:{},
+  master:null,musicGain:null,ambientGain:null,musicTimer:null,ambientTimer:null,currentMap:null,currentMood:'day',
+  unlock(){
+    if(!save.audioEnabled)return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      if(!this.ctx){this.ctx=new AC();this.master=this.ctx.createGain();this.musicGain=this.ctx.createGain();this.ambientGain=this.ctx.createGain();this.musicGain.gain.value=this.musicVolume;this.ambientGain.gain.value=this.ambientVolume;this.musicGain.connect(this.master);this.ambientGain.connect(this.master);this.master.gain.value=.8;this.master.connect(this.ctx.destination);}
+      this.unlocked=true;if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
+      this.refreshLoops();
+    }catch(error){console.warn('FireFly: áudio indisponível.',error);}
   },
-  tone(frequency = 440, duration = 0.09, type = 'sine', volume = this.sfxVolume) {
-    if (!this.unlocked || !this.ctx || !save.audioEnabled) return;
-    try {
-      const oscillator = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-      oscillator.type = type; oscillator.frequency.value = frequency;
-      const now = this.ctx.currentTime;
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(volume, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-      oscillator.connect(gain); gain.connect(this.ctx.destination); oscillator.start(now); oscillator.stop(now + duration + 0.02);
-    } catch (error) { console.warn('FireFly: erro de áudio.', error); }
+  tone(frequency=440,duration=.09,type='sine',volume=this.sfxVolume,destination=this.master){
+    if(!this.unlocked||!this.ctx||!save.audioEnabled)return;
+    try{const o=this.ctx.createOscillator(),g=this.ctx.createGain(),now=this.ctx.currentTime;o.type=type;o.frequency.setValueAtTime(frequency,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(.0001,volume),now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+duration);o.connect(g);g.connect(destination||this.master);o.start(now);o.stop(now+duration+.03);}catch(error){console.warn('FireFly: erro de áudio.',error);}
   },
-  playSFX(id) {
-    if (!save.audioEnabled) return;
-    switch (id) {
-      case 'capture': this.tone(660, 0.08); setTimeout(() => this.tone(880, 0.12), 70); break;
-      case 'coin': this.tone(980, 0.1); break;
-      case 'purchase': this.tone(520, 0.08); setTimeout(() => this.tone(780, 0.12), 90); break;
-      case 'quest-complete': this.tone(523, 0.1); setTimeout(() => this.tone(784, 0.1), 100); setTimeout(() => this.tone(1046, 0.16), 200); break;
-      case 'van-door': this.tone(180, 0.12, 'square'); break;
-      case 'van-engine': this.tone(90, 0.5, 'sawtooth', 0.08); break;
-      case 'fish': this.tone(340, 0.12); break;
-      case 'fish-bite': this.tone(420, 0.06); setTimeout(() => this.tone(300, 0.08), 60); break;
-      case 'line-snap': this.tone(180, 0.18, 'sawtooth', 0.18); break;
-      case 'net-swing': this.tone(240, 0.05, 'triangle', 0.12); break;
-      case 'error': this.tone(150, 0.12, 'square'); break;
-      default: break;
+  note(freq,duration=.45,delay=0,volume=.045){setTimeout(()=>this.tone(freq,duration,'triangle',volume,this.musicGain),delay*1000);},
+  wind(){this.tone(120+Math.random()*50,.32,'sine',.012,this.ambientGain);},
+  chirp(){const f=680+Math.random()*420;this.tone(f,.07,'sine',.018,this.ambientGain);setTimeout(()=>this.tone(f*1.22,.1,'sine',.014,this.ambientGain),65);},
+  water(){this.tone(280+Math.random()*120,.12,'sine',.012,this.ambientGain);},
+  playSFX(id){
+    if(!save.audioEnabled)return;
+    switch(id){
+      case'capture':this.tone(660,.08);setTimeout(()=>this.tone(880,.12),70);break;
+      case'coin':this.tone(980,.1);break;
+      case'purchase':this.tone(520,.08);setTimeout(()=>this.tone(780,.12),90);break;
+      case'quest-complete':this.tone(523,.1);setTimeout(()=>this.tone(784,.1),100);setTimeout(()=>this.tone(1046,.16),200);break;
+      case'van-door':this.tone(180,.12,'square');break;
+      case'van-engine':this.tone(90,.5,'sawtooth',.08);break;
+      case'fish':this.tone(340,.12);break;
+      case'fish-bite':this.tone(420,.06);setTimeout(()=>this.tone(300,.08),60);break;
+      case'line-snap':this.tone(180,.18,'sawtooth',.18);break;
+      case'net-swing':this.tone(240,.05,'triangle',.12);break;
+      case'error':this.tone(150,.12,'square');break;
+      case'jump':this.tone(260,.045,'triangle',.06);break;
+      case'footstep':this.tone(95,.025,'triangle',.025);break;
+      case'rare':this.note(660,.18,0,.05);this.note(880,.25,.12,.055);this.note(1320,.35,.25,.06);break;
+      default:break;
     }
   },
-  playMusic(map) { this.currentMap = map; },
-  playAmbient(map) { this.currentAmbient = map; },
-  toggle() { save.audioEnabled = !save.audioEnabled; saveGame(); notify(save.audioEnabled ? 'Som ativado' : 'Som desativado'); }
+  refreshLoops(){if(!this.unlocked||!this.ctx)return;this.stopLoops();this.startMusic();this.startAmbient();},
+  startMusic(){
+    const night=this.currentMood==='night';const cave=this.currentMap==='cave';
+    const scale=night?[196,233,262,294,349]:[220,247,294,330,392];
+    const notes=cave?[147,175,220,262,196]:scale;let i=0;
+    this.musicTimer=setInterval(()=>{if(!save.audioEnabled||!this.ctx)return;const root=notes[i++%notes.length];this.note(root,.5,0,night?.035:.045);if(i%3===0)this.note(root*1.5,.35,.12,night?.022:.028);if(i%5===0)this.note(root*2,.3,.24,.018);},night?1050:820);
+  },
+  startAmbient(){
+    const map=this.currentMap;this.ambientTimer=setInterval(()=>{if(!save.audioEnabled)return;this.wind();if(map==='forest'){if(Math.random()<.65)this.chirp();if(Math.random()<.35)this.water();}else if(map==='village'){if(Math.random()<.55)this.chirp();}else if(map==='cave'){this.tone(75+Math.random()*35,.5,'sine',.014,this.ambientGain);if(Math.random()<.35)this.tone(190+Math.random()*90,.12,'triangle',.01,this.ambientGain);}},900);
+  },
+  playMusic(map){this.currentMap=map||'village';this.refreshLoops();},
+  playAmbient(map){this.currentMap=map||this.currentMap||'village';this.refreshLoops();},
+  setTime(isNight){const mood=isNight?'night':'day';if(mood!==this.currentMood){this.currentMood=mood;this.refreshLoops();}},
+  stopLoops(){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}if(this.ambientTimer){clearInterval(this.ambientTimer);this.ambientTimer=null;}},
+  toggle(){save.audioEnabled=!save.audioEnabled;if(!save.audioEnabled)this.stopLoops();saveGame();notify(save.audioEnabled?'Som ativado':'Som desativado');if(save.audioEnabled)this.unlock();}
 };
