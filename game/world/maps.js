@@ -1,25 +1,44 @@
 /* =========================================================
-   MAPAS — interactables, transição entre áreas e a caverna
+   MAPAS — FireFly World 2.1
+   Mundo contínuo com regiões e pontos de interesse.
    ========================================================= */
+import {state} from '../core/state.js';
+import {save,saveGame} from '../systems/save.js';
+import {AudioManager} from '../systems/audio.js';
+import {spawnForest,spawnCave} from '../entities/creatures.js';
+import {titoDialog} from '../systems/quests.js';
+import {shopDialog} from '../systems/shop.js';
+import {startVan} from '../entities/van.js';
+import {startFishing} from '../systems/fishing.js';
+import {dialog,closeDialog} from '../render/dialog.js';
+import {CAVE_ENTRANCE_X,FOREST_POIS} from './spots.js';
 
-import { state } from '../core/state.js';
-import { save, saveGame } from '../systems/save.js';
-import { AudioManager } from '../systems/audio.js';
-import { spawnForest, spawnCave } from '../entities/creatures.js';
-import { titoDialog } from '../systems/quests.js';
-import { shopDialog } from '../systems/shop.js';
-import { startVan } from '../entities/van.js';
-import { startFishing } from '../systems/fishing.js';
-import { dialog, closeDialog } from '../render/dialog.js';
+export function transition(job){if(state.fade.job)return;state.fade.job=job;state.fade.value=.01;}
+export function beginMap(id,x=250){transition(()=>{state.map=id;save.map=id;state.player.x=x;state.player.y=515;state.player.vx=0;state.camera.x=Math.max(0,x-350);state.entities=[];state.interactables=[];state.fishing=null;buildMap();saveGame();AudioManager.playMusic(id);AudioManager.playAmbient(id);});}
+export function addInteractable(id,x,y,radius,type,onInteract,label){state.interactables.push({id,x,y,radius,type,onInteract,label});}
+export function activeInteractable(){const p=state.player;return state.interactables.filter(o=>Math.abs(o.x-p.x)<o.radius&&Math.abs(o.y-p.y)<95).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];}
 
-export function transition(job) { if (state.fade.job) return; state.fade.job = job; state.fade.value = 0.01; }
-export function beginMap(id, x = 250) { transition(() => { state.map = id; save.map = id; state.player.x = x; state.player.y = 515; state.player.vx = 0; state.camera.x = 0; state.entities = []; state.interactables = []; state.fishing = null; buildMap(); saveGame(); AudioManager.playMusic(id); AudioManager.playAmbient(id); }); }
-export function addInteractable(id, x, y, radius, type, onInteract, label) { state.interactables.push({ id, x, y, radius, type, onInteract, label }); }
-export function activeInteractable() { const p = state.player; return state.interactables.filter((object) => Math.abs(object.x - p.x) < object.radius && Math.abs(object.y - p.y) < 90).sort((a,b) => Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0]; }
-export function caveDialog() { dialog('Fenda Cintilante', 'Uma corrente fria e um brilho azul escapam lá de dentro.', [['ENTRAR NA CAVERNA', () => { closeDialog(); beginMap('cave', 240); }], ['AGORA NÃO', closeDialog]]); }
-export function buildMap() {
-  state.interactables = [];
-  if (state.map === 'village') { addInteractable('tito',460,505,85,'npc',titoDialog,'Falar com Tito'); addInteractable('shop',630,505,125,'shop',shopDialog,'Entrar na lojinha'); addInteractable('van',980,510,145,'vehicle',startVan,'Subir na van'); }
-  if (state.map === 'forest') { spawnForest(); addInteractable('fish',760,520,190,'fishing',startFishing,'Pescar no lago'); addInteractable('cave',1590,510,135,'door',caveDialog,'Entrar na caverna'); addInteractable('village',100,510,95,'door',() => beginMap('village',1090),'Voltar para Vila Lumina'); }
-  if (state.map === 'cave') { spawnCave(); addInteractable('exit',120,510,100,'door',() => beginMap('forest',1500),'Sair da caverna'); }
+function caveDialog(){dialog('Fenda Cintilante','Uma corrente fria atravessa as árvores. Há marcas antigas na pedra e um brilho azul vindo de baixo.',[['ENTRAR',()=>{closeDialog();beginMap('cave',180)}],['AGORA NÃO',closeDialog]]);}
+
+export function buildMap(){
+  state.interactables=[];
+  if(state.map==='village'){
+    addInteractable('tito',460,505,90,'npc',titoDialog,'Falar com Tito');
+    addInteractable('shop',630,505,130,'shop',shopDialog,'Entrar na lojinha');
+    addInteractable('van',980,510,150,'vehicle',startVan,'Explorar de van');
+  }
+  if(state.map==='forest'){
+    spawnForest();
+    addInteractable('village',80,510,110,'door',()=>beginMap('village',1090),'Voltar para Vila Lumina');
+    addInteractable('fish',1840,525,330,'fishing',startFishing,'Pescar na Lagoa Cintilante');
+    addInteractable('cave',CAVE_ENTRANCE_X,505,155,'door',caveDialog,'Explorar a Caverna Ecoante');
+    for(const poi of FOREST_POIS){
+      if(poi.type==='cabin')addInteractable(poi.id,poi.x,500,80,'poi',()=>dialog(poi.label,'Uma construção antiga tomada pela floresta. Talvez alguém tenha vivido aqui.',[['FECHAR',closeDialog]]),poi.label);
+      if(poi.type==='burrow')addInteractable(poi.id,poi.x,535,70,'poi',()=>dialog(poi.label,'Há marcas pequenas no chão. Alguma criatura usa esta toca.',[['FECHAR',closeDialog]]),poi.label);
+    }
+  }
+  if(state.map==='cave'){
+    spawnCave();
+    addInteractable('exit',90,510,120,'door',()=>beginMap('forest',CAVE_ENTRANCE_X-220),'Voltar à floresta');
+  }
 }
