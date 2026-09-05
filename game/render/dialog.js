@@ -1,14 +1,37 @@
-/* =========================================================
-   DIÁLOGOS
-   ========================================================= */
-
+/* FireFly — sistema de diálogos seguro */
 import { ui } from '../core/dom.js';
 
-export function dialog(title, body, actions) {
+export function dialog(title = '', body = '', actions = [], legacyActions = null) {
   if (!ui.dialog) return;
-  ui.dialog.innerHTML = `<button class="close">×</button><h2>${title}</h2><p>${body}</p>${actions.map((action, index) => `<button class="choice action-${index}">${action[0]}</button>`).join('')}`;
+
+  // Compatibilidade com chamadas antigas de 4 argumentos: dialog(nome, titulo, texto, ações).
+  if (Array.isArray(legacyActions)) {
+    body = `${body}<br>${actions ?? ''}`;
+    actions = legacyActions;
+  }
+
+  const list = Array.isArray(actions) ? actions : (actions == null ? [] : [actions]);
+  const normalized = list.map((action) => {
+    if (Array.isArray(action)) {
+      return [String(action[0] ?? 'OK'), typeof action[1] === 'function' ? action[1] : closeDialog];
+    }
+    if (action && typeof action === 'object') {
+      return [String(action.label ?? action.text ?? action.title ?? 'OK'), typeof action.onClick === 'function' ? action.onClick : closeDialog];
+    }
+    return [String(action ?? 'OK'), closeDialog];
+  });
+
+  ui.dialog.innerHTML = `<button class="close">×</button><h2>${String(title ?? '')}</h2><p>${String(body ?? '')}</p>${normalized.map((action, index) => `<button class="choice action-${index}">${action[0]}</button>`).join('')}`;
   ui.dialog.classList.remove('hidden');
-  const close = ui.dialog.querySelector('.close'); if (close) close.onclick = closeDialog;
-  actions.forEach((action, index) => { const button = ui.dialog.querySelector('.action-' + index); if (button) button.onclick = action[1]; });
+
+  const close = ui.dialog.querySelector('.close');
+  if (close) close.onclick = closeDialog;
+  normalized.forEach((action, index) => {
+    const button = ui.dialog.querySelector('.action-' + index);
+    if (button) button.onclick = action[1];
+  });
 }
-export function closeDialog() { if (ui.dialog) ui.dialog.classList.add('hidden'); }
+
+export function closeDialog() {
+  if (ui.dialog) ui.dialog.classList.add('hidden');
+}
