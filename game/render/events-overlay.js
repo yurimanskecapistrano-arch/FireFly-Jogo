@@ -1,53 +1,13 @@
 /* =========================================================
    FIREFLY 6 — OVERLAY DE EVENTOS
    ========================================================= */
-import {ctx} from '../core/dom.js';
-import {state} from '../core/state.js';
-import {wx} from './draw-helpers.js';
-import {eventProgress} from '../systems/events.js';
-
-const TAU=Math.PI*2;
-let lightning=0;
-
-export function renderEventsOverlay(){
-  const e=eventProgress();
-  if(!e)return;
-  const r=state.eventRuntime;
-  ctx.save();
-  if(r.type==='storm')drawStorm();
-  if(r.type==='specialNight')drawFireflyNight();
-  if(r.type==='swarm')drawSwarm();
-  if(r.type==='migration')drawMigration();
-  if(r.type==='rare')drawCrystalResonance();
-  if(r.type==='unique')drawMoonfall();
-  drawEventHud(e);
-  ctx.restore();
-}
-function drawStorm(){
-  ctx.fillStyle='#18283a';ctx.globalAlpha=.14;ctx.fillRect(0,0,1280,720);
-  ctx.strokeStyle='#b9d5df';ctx.globalAlpha=.08;ctx.lineWidth=2;
-  for(let x=0;x<1280;x+=42){ctx.beginPath();ctx.moveTo(x,330);ctx.lineTo(x-30,500);ctx.stroke();}
-  if(Math.random()<.012)lightning=.14;
-  if(lightning>0){ctx.globalAlpha=lightning;ctx.fillStyle='#fff6d0';ctx.fillRect(0,0,1280,720);lightning-=.035;}
-}
-function drawFireflyNight(){
-  ctx.fillStyle='#1d1640';ctx.globalAlpha=.12;ctx.fillRect(0,300,1280,420);
-  for(let i=0;i<32;i++){const x=(i*97+state.t*18)%1280,y=350+(i*53)%280;ctx.globalAlpha=.22+.12*Math.sin(state.t*3+i);ctx.fillStyle='#f8e68b';ctx.shadowColor='#f8e68b';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y,2.5,0,TAU);ctx.fill();}
-  ctx.shadowBlur=0;
-}
-function drawSwarm(){
-  for(let i=0;i<22;i++){const x=(i*83+state.t*28)%1280,y=340+(i*47)%160+Math.sin(state.t*2+i)*12;ctx.globalAlpha=.15;ctx.fillStyle='#ffe2a0';ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill();}
-}
-function drawMigration(){
-  ctx.globalAlpha=.2;ctx.strokeStyle='#f1d99a';ctx.lineWidth=2;ctx.setLineDash([8,12]);ctx.beginPath();ctx.moveTo(0,520);ctx.lineTo(1280,485);ctx.stroke();ctx.setLineDash([]);
-}
-function drawCrystalResonance(){
-  const pulse=.5+.5*Math.sin(state.t*3);ctx.globalAlpha=.06+.04*pulse;ctx.fillStyle='#83e5e0';ctx.fillRect(0,250,1280,470);
-  for(let i=0;i<12;i++){const x=(i*137+state.t*7)%1280;ctx.globalAlpha=.12;ctx.fillStyle='#b9ffff';ctx.beginPath();ctx.arc(x,410+(i%4)*45,2+pulse*2,0,TAU);ctx.fill();}
-}
-function drawMoonfall(){
-  const x=wx(2050),y=375,pulse=.5+.5*Math.sin(state.t*4);if(x>-100&&x<1380){ctx.globalAlpha=.18;ctx.fillStyle='#d6b8ff';ctx.beginPath();ctx.arc(x,y,65+pulse*18,0,TAU);ctx.fill();ctx.globalAlpha=.8;ctx.fillStyle='#f4e4a4';ctx.beginPath();ctx.arc(x,y,7+pulse*3,0,TAU);ctx.fill();ctx.globalAlpha=.45;ctx.strokeStyle='#f4e4a4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y+10);ctx.lineTo(x-35,y+90);ctx.stroke();}
-}
-function drawEventHud(e){
-  const ratio=Math.max(0,Math.min(1,e.time/e.duration));
-  const w=310,x=1280-w-24,y=88;ctx.globalAlpha=.92;ctx.fillStyle='#211d25';ctx.beginPath();ctx.roundRect(x,y,w,58,10);ctx.fill();ctx.strokeStyle='#f2c978';ctx.lineWidth=1.5;ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#fff0c2';ctx.font='700 12px system-ui';ctx.fillText(`EVENTO · ${e.name}`,x+14,y+21);ctx.fillStyle='#d9cfae';ctx.font='10px system-ui';ctx.fillText(`${Math.ceil(e.time)}s restantes`,x+14,y+39);ctx.fillStyle='#d9b768';ctx.fillRect(x+128,y+34,160*ratio,5);}
+import {ctx} from '../core/dom.js';import {state} from '../core/state.js';import {wx} from './draw-helpers.js';import {eventProgress} from '../systems/events.js';import {save} from '../systems/save.js';
+const TAU=Math.PI*2;let lightning=0;
+export function renderEventsOverlay(){const e=eventProgress();if(e){const r=state.eventRuntime;ctx.save();if(r.type==='storm')drawStorm();if(r.type==='specialNight')drawFireflyNight();if(r.type==='swarm')drawSwarm();if(r.type==='migration')drawMigration();if(r.type==='rare')drawCrystalResonance();if(r.type==='unique')drawMoonfall(true);drawEventHud(e);ctx.restore();}if(state.map==='forest'&&save.world?.eventFlags?.moonfall)drawMoonfall(false);}
+function drawStorm(){ctx.fillStyle='#18283a';ctx.globalAlpha=.14;ctx.fillRect(0,0,1280,720);ctx.strokeStyle='#b9d5df';ctx.globalAlpha=.08;ctx.lineWidth=2;for(let x=0;x<1280;x+=42){ctx.beginPath();ctx.moveTo(x,330);ctx.lineTo(x-30,500);ctx.stroke();}if(Math.random()<.012)lightning=.14;if(lightning>0){ctx.globalAlpha=lightning;ctx.fillStyle='#fff6d0';ctx.fillRect(0,0,1280,720);lightning-=.035;}}
+function drawFireflyNight(){ctx.fillStyle='#1d1640';ctx.globalAlpha=.12;ctx.fillRect(0,300,1280,420);for(let i=0;i<32;i++){const x=(i*97+state.t*18)%1280,y=350+(i*53)%280;ctx.globalAlpha=.22+.12*Math.sin(state.t*3+i);ctx.fillStyle='#f8e68b';ctx.shadowColor='#f8e68b';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y,2.5,0,TAU);ctx.fill();}ctx.shadowBlur=0;}
+function drawSwarm(){for(let i=0;i<22;i++){const x=(i*83+state.t*28)%1280,y=340+(i*47)%160+Math.sin(state.t*2+i)*12;ctx.globalAlpha=.15;ctx.fillStyle='#ffe2a0';ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill();}}
+function drawMigration(){ctx.globalAlpha=.2;ctx.strokeStyle='#f1d99a';ctx.lineWidth=2;ctx.setLineDash([8,12]);ctx.beginPath();ctx.moveTo(0,520);ctx.lineTo(1280,485);ctx.stroke();ctx.setLineDash([]);}
+function drawCrystalResonance(){const pulse=.5+.5*Math.sin(state.t*3);ctx.globalAlpha=.06+.04*pulse;ctx.fillStyle='#83e5e0';ctx.fillRect(0,250,1280,470);for(let i=0;i<12;i++){const x=(i*137+state.t*7)%1280;ctx.globalAlpha=.12;ctx.fillStyle='#b9ffff';ctx.beginPath();ctx.arc(x,410+(i%4)*45,2+pulse*2,0,TAU);ctx.fill();}}
+function drawMoonfall(active){const x=wx(2050),y=375,pulse=.5+.5*Math.sin(state.t*4);if(x<-100||x>1380)return;ctx.save();ctx.globalAlpha=active?.18:.10;ctx.fillStyle='#d6b8ff';ctx.beginPath();ctx.arc(x,y,active?65+pulse*18:48,0,TAU);ctx.fill();ctx.globalAlpha=active?.8:.5;ctx.fillStyle='#f4e4a4';ctx.beginPath();ctx.arc(x,y,active?7+pulse*3:5,0,TAU);ctx.fill();ctx.globalAlpha=.45;ctx.strokeStyle='#f4e4a4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y+10);ctx.lineTo(x-35,y+90);ctx.stroke();if(!active){ctx.globalAlpha=.8;ctx.fillStyle='#fff0bd';ctx.font='700 9px system-ui';ctx.textAlign='center';ctx.fillText('LOCAL DO IMPACTO',x,y+112);}ctx.restore();}
+function drawEventHud(e){const ratio=Math.max(0,Math.min(1,e.time/e.duration));const w=310,x=1280-w-24,y=88;ctx.globalAlpha=.92;ctx.fillStyle='#211d25';ctx.beginPath();ctx.roundRect(x,y,w,58,10);ctx.fill();ctx.strokeStyle='#f2c978';ctx.lineWidth=1.5;ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#fff0c2';ctx.font='700 12px system-ui';ctx.fillText(`EVENTO · ${e.name}`,x+14,y+21);ctx.fillStyle='#d9cfae';ctx.font='10px system-ui';ctx.fillText(`${Math.ceil(e.time)}s restantes`,x+14,y+39);ctx.fillStyle='#d9b768';ctx.fillRect(x+128,y+34,160*ratio,5);}
