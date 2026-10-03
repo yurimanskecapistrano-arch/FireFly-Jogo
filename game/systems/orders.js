@@ -9,5 +9,16 @@ export function ensureOrders(){save.economy??={reputation:0,totalSold:0,totalEar
 export function orderState(id){ensureOrders();return save.economy.orders[id]||{status:'available',progress:0};}
 export function acceptOrder(id){ensureOrders();const d=ORDERS.find(o=>o.id===id);if(!d)return false;const q=orderState(id);if(q.status!=='available')return false;q.status='active';q.progress=0;save.economy.orders[id]=q;saveGame();notify(`📦 Pedido aceito: ${d.title}`);AudioManager.playSFX('coin');return true;}
 export function addOrderProgress(kind,target,amount=1){ensureOrders();for(const d of ORDERS){const q=orderState(d.id);if(q.status!=='active'||d.kind!==kind||d.target!==target)continue;q.progress=Math.min(d.required,q.progress+amount);if(q.progress>=d.required){q.status='complete';notify(`✓ Pedido pronto: ${d.title}. Volte para ${d.giver}.`);AudioManager.playSFX('success');}}saveGame();}
-export function claimOrder(id){ensureOrders();const d=ORDERS.find(o=>o.id===id);const q=orderState(id);if(!d||q.status!=='complete')return false;q.status='claimed';save.coins+=d.reward;addXp(d.xp,`pedido:${id}`);save.economy.reputation+=d.rep;saveGame();notify(`PEDIDO ENTREGUE · +${d.reward}✦ · +${d.rep} reputação`);AudioManager.playSFX('quest-complete');return true;}
+function requiredAvailable(d){if(d.kind==='resource')return (save.progression?.resources?.[d.target]||0)>=d.required;return (save.catches?.[d.target]||0)>=d.required;}
+function consumeRequired(d){if(d.kind==='resource')save.progression.resources[d.target]-=d.required;else save.catches[d.target]-=d.required;}
+export function claimOrder(id){
+  ensureOrders();const d=ORDERS.find(o=>o.id===id);const q=orderState(id);
+  if(!d||q.status!=='complete')return false;
+  if(!requiredAvailable(d)){q.status='active';q.progress=0;save.economy.orders[id]=q;saveGame();notify(`Você não tem mais os ${d.required} itens necessários para entregar o pedido.`);AudioManager.playSFX('error');return false;}
+  consumeRequired(d);
+  const mastery=save.progression?.upgrades?.mastery?1.2:1;
+  const reward=Math.round(d.reward*mastery);const xp=Math.round(d.xp*mastery);const rep=Math.round(d.rep*mastery);
+  q.status='claimed';save.economy.orders[id]=q;save.coins+=reward;addXp(xp,`pedido:${id}`);save.economy.reputation+=rep;
+  saveGame();notify(`PEDIDO ENTREGUE · +${reward}✦ · +${rep} reputação`);AudioManager.playSFX('quest-complete');return true;
+}
 export function orderList(){ensureOrders();return ORDERS.map(d=>({...d,state:orderState(d.id)}));}
