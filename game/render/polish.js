@@ -1,56 +1,14 @@
 /* =========================================================
-   POLISH OVERLAY — atmosfera e game feel
+   POLISH OVERLAY — arte, profundidade e atmosfera
    ========================================================= */
-import {ctx} from '../core/dom.js';
-import {state,isNight} from '../core/state.js';
-import {W,H} from '../core/constants.js';
-import {weatherType} from '../systems/weather.js';
-
-const TAU=Math.PI*2;
-
-function seeded(i){return Math.sin(i*91.731+17.13)*.5+.5;}
-
-export function renderPolishOverlay(){
-  drawAmbientMotes();
-  drawDepthVignette();
-  drawCinematicCorners();
-}
-
-function drawAmbientMotes(){
-  if(!['forest','cave','village'].includes(state.map))return;
-  const night=isNight();
-  const rain=weatherType()==='rain';
-  if(!night&&!rain)return;
-  ctx.save();
-  const count=state.map==='cave'?18:30;
-  for(let i=0;i<count;i++){
-    const phase=state.t*(.35+seeded(i)*.65)+i*2.7;
-    const x=(seeded(i*3+2)*W+Math.sin(phase)*35+i*11)%W;
-    const y=350+seeded(i*5+1)*270+Math.cos(phase*.8)*18;
-    const pulse=.35+.65*(.5+.5*Math.sin(phase*2.2));
-    ctx.globalAlpha=(night?.32:.12)*pulse;
-    ctx.fillStyle=state.map==='cave'?'#9ee5d4':'#f4df91';
-    ctx.shadowBlur=night?9:4;
-    ctx.shadowColor=ctx.fillStyle;
-    ctx.beginPath();ctx.arc(x,y,night?1.6:1.1,0,TAU);ctx.fill();
-  }
-  ctx.restore();
-}
-
-function drawDepthVignette(){
-  const g=ctx.createRadialGradient(W*.5,H*.53,180,W*.5,H*.52,760);
-  g.addColorStop(0,'#0000');
-  g.addColorStop(.72,'#071b2110');
-  g.addColorStop(1,isNight()?'#050b14aa':'#0b202433');
-  ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore();
-}
-
-function drawCinematicCorners(){
-  if(state.fade.value>0)return;
-  ctx.save();
-  ctx.globalAlpha=.16;
-  ctx.strokeStyle='#f1d9a1';
-  ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(18,56);ctx.lineTo(18,92);ctx.moveTo(18,56);ctx.lineTo(54,56);ctx.moveTo(W-18,56);ctx.lineTo(W-18,92);ctx.moveTo(W-18,56);ctx.lineTo(W-54,56);ctx.stroke();
-  ctx.restore();
-}
+import {ctx} from '../core/dom.js';import {state,isNight} from '../core/state.js';import {W,H} from '../core/constants.js';import {weatherType} from '../systems/weather.js';
+const TAU=Math.PI*2;function seeded(i){return Math.sin(i*91.731+17.13)*.5+.5;}function wx(x){return x-state.camera.x;}
+export function renderPolishOverlay(){drawScenicDepth();drawAtmosphericDepth();drawAmbientMotes();drawFireflyClusters();drawWaterGlints();drawForegroundFoliage();drawDepthVignette();drawCinematicCorners();}
+function drawScenicDepth(){ctx.save();if(state.map==='forest'){const night=isNight();ctx.globalAlpha=night?.42:.26;ctx.fillStyle=night?'#172b38':'#54736e';ctx.beginPath();ctx.moveTo(0,390);for(let x=0;x<=W;x+=44){const y=330-Math.sin(x*.011+state.camera.x*.001)*32-Math.sin(x*.027)*18;ctx.lineTo(x,y);}ctx.lineTo(W,430);ctx.lineTo(0,430);ctx.closePath();ctx.fill();for(let i=0;i<14;i++){const x=i*108-(state.camera.x*.12%108),base=432,h=70+(i%4)*24;ctx.globalAlpha=night?.34:.19;ctx.fillStyle=i%2?'#203f3d':'#294b43';ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x+28,base-h);ctx.lineTo(x+56,base);ctx.closePath();ctx.fill();}ctx.globalAlpha=night?.48:.3;ctx.fillStyle=night?'#101e2b':'#1d4039';for(let i=0;i<8;i++){const x=i*190-(state.camera.x*.04%190);ctx.beginPath();ctx.arc(x,82+(i%3)*35,105+(i%2)*30,0,TAU);ctx.fill();}const nearLake=state.player.x>1100&&state.player.x<2800;if(nearLake){const g=ctx.createLinearGradient(0,570,0,H);g.addColorStop(0,night?'#17364066':'#2e758066');g.addColorStop(1,'#08191dcc');ctx.globalAlpha=.34;ctx.fillStyle=g;ctx.fillRect(0,570,W,H-570);for(let i=0;i<12;i++){const x=(i*121+state.camera.x*.18)%W;ctx.globalAlpha=.12;ctx.strokeStyle=night?'#9fd6c4':'#b8e2d1';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,620+(i%5)*34);ctx.lineTo(x+45+(i%3)*12,620+(i%5)*34);ctx.stroke();}}}else if(state.map==='village'){ctx.globalAlpha=.16;ctx.fillStyle='#d9c88f';ctx.beginPath();ctx.arc(W*.78,145,150,0,TAU);ctx.fill();}else if(state.map==='cave'){for(let i=0;i<9;i++){const x=(i*157+state.camera.x*.08)%W;ctx.globalAlpha=.08;ctx.fillStyle=i%2?'#73d8ca':'#b58cff';ctx.beginPath();ctx.moveTo(x,540);ctx.lineTo(x+14,430-(i%3)*30);ctx.lineTo(x+29,540);ctx.closePath();ctx.fill();}}ctx.restore();}
+function drawAtmosphericDepth(){if(state.map==='lobby'||state.map==='village')return;const night=isNight();ctx.save();const g=ctx.createLinearGradient(0,230,0,590);g.addColorStop(0,night?'#12283a12':'#d9f0dd09');g.addColorStop(.5,night?'#0b273015':'#e8e1c00a');g.addColorStop(1,'#020c100d');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);if(state.map==='forest'){for(let i=0;i<7;i++){const x=((i*260+state.camera.x*.035)%1500)-120,y=350+i%3*42;ctx.globalAlpha=.045+(i%2)*.02;ctx.fillStyle=night?'#9eb7ad':'#d7dfc3';ctx.beginPath();ctx.ellipse(x,y,170+(i%3)*50,22+(i%2)*8,0,0,TAU);ctx.fill();}}ctx.restore();}
+function drawAmbientMotes(){if(!['forest','cave','village'].includes(state.map))return;const night=isNight(),rain=weatherType()==='rain';if(!night&&!rain)return;ctx.save();const count=state.map==='cave'?22:42;for(let i=0;i<count;i++){const phase=state.t*(.3+seeded(i)*.7)+i*2.7,x=(seeded(i*3+2)*W+Math.sin(phase)*35+i*11)%W,y=315+seeded(i*5+1)*305+Math.cos(phase*.8)*18,pulse=.3+.7*(.5+.5*Math.sin(phase*2.2));ctx.globalAlpha=(night?.3:.1)*pulse;ctx.fillStyle=state.map==='cave'?'#91e2d0':'#f2d77f';ctx.shadowBlur=night?10:5;ctx.shadowColor=ctx.fillStyle;ctx.beginPath();ctx.arc(x,y,night?1.7:1.2,0,TAU);ctx.fill();}ctx.restore();}
+function drawFireflyClusters(){if(!isNight()||!['forest','village'].includes(state.map))return;ctx.save();for(let i=0;i<26;i++){const base=(i*211+Math.floor(state.camera.x*.12))%5600,x=wx(base),y=365+(i*83)%170+Math.sin(state.t*.9+i)*12;if(x<-30||x>W+30)continue;const pulse=.35+.65*(.5+.5*Math.sin(state.t*2.4+i));ctx.globalAlpha=.16*pulse;ctx.fillStyle='#f5d777';ctx.shadowBlur=14;ctx.shadowColor='#e7c65c';ctx.beginPath();ctx.arc(x,y,2.1,0,TAU);ctx.fill();ctx.globalAlpha=.45*pulse;ctx.beginPath();ctx.arc(x,y,.75,0,TAU);ctx.fill();}ctx.restore();}
+function drawWaterGlints(){if(state.map!=='forest')return;const p=state.player.x;if(p<1100||p>2800)return;ctx.save();for(let i=0;i<22;i++){const world=1450+((i*137+Math.floor(state.t*18))%850),x=wx(world),y=505+(i%7)*9;if(x<-20||x>W+20)continue;ctx.globalAlpha=.18+.12*Math.sin(state.t*1.5+i);ctx.strokeStyle=i%3?'#ccebe1':'#f0d98f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-10,y);ctx.lineTo(x+10,y);ctx.stroke();}ctx.restore();}
+function drawForegroundFoliage(){if(!['forest','village'].includes(state.map))return;ctx.save();for(let i=0;i<18;i++){const x=(i*79+(state.camera.x*.65)%79)-20,y=610+(i%4)*22;ctx.globalAlpha=.18+(i%3)*.05;ctx.fillStyle=i%2?'#183c34':'#244b3c';ctx.beginPath();ctx.moveTo(x,y+65);ctx.quadraticCurveTo(x-7,y+22,x+2,y);ctx.quadraticCurveTo(x+12,y+25,x+7,y+65);ctx.fill();}ctx.restore();}
+function drawDepthVignette(){const g=ctx.createRadialGradient(W*.5,H*.51,170,W*.5,H*.5,770);g.addColorStop(0,'#0000');g.addColorStop(.68,'#06191d08');g.addColorStop(1,isNight()?'#030b12b8':'#071b1d38');ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore();}
+function drawCinematicCorners(){if(state.fade.value>0)return;ctx.save();ctx.globalAlpha=.2;ctx.strokeStyle='#e7d29d';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(18,58);ctx.lineTo(18,91);ctx.moveTo(18,58);ctx.lineTo(50,58);ctx.moveTo(W-18,58);ctx.lineTo(W-18,91);ctx.moveTo(W-18,58);ctx.lineTo(W-50,58);ctx.stroke();ctx.restore();}
