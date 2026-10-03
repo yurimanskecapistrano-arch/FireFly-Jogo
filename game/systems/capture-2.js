@@ -10,14 +10,14 @@ import {addOrderProgress} from './orders.js';
 function net(){
   if(save.inventory.masterNet>0)return NETS.prism;
   if(save.inventory.reinforcedNet>0)return NETS.reinforced;
-  if(save.inventory.luckyCharm>0&&state.clock<.22||save.inventory.luckyCharm>0&&state.clock>.78)return NETS.lunar;
+  const night=state.clock<.22||state.clock>.78;
+  if(save.inventory.luckyCharm>0&&night)return NETS.lunar;
   return NETS.basic;
 }
 function distance(e,p){return Math.hypot(e.x-p.x,e.y-p.y);}
 function variantFor(type){
   const data=SPECIES_2[type];if(!data?.variants?.length)return null;
-  const chanceBase=save.inventory.luckyCharm?.1?.0:0;
-  const rollChance=.18+(save.inventory.luckyCharm?chanceBase:.0);
+  const rollChance=.18+(save.inventory.luckyCharm?.08:0);
   if(Math.random()>rollChance)return null;
   return data.variants[Math.floor(Math.random()*data.variants.length)];
 }
@@ -34,12 +34,7 @@ export function capture(){
 export function captureKey(){
   const c=state.capture;if(!c||c.stage==='miss')return false;
   const e=c.target;if(!e||!e.alive){state.capture=null;return false;}
-  const ratio=clamp(c.timer/c.window,0,1);
-  const timing=1-Math.abs(ratio-.5)*2;
-  c.skill=timing;
-  c.stage='resolve';
-  resolveCapture();
-  return true;
+  const ratio=clamp(c.timer/c.window,0,1);const timing=1-Math.abs(ratio-.5)*2;c.skill=timing;c.stage='resolve';resolveCapture();return true;
 }
 function resolveCapture(){
   const c=state.capture;if(!c)return;
@@ -56,8 +51,7 @@ export function tickCapture(dt){
   const c=state.capture;if(!c)return;
   if(c.stage==='miss'){c.timer-=dt;if(c.timer<=0)state.capture=null;return;}
   if(c.stage!=='timing')return;
-  c.timer-=dt;
-  if(c.timer<=0){c.timer=0;c.skill=0;resolveCapture();}
+  c.timer-=dt;if(c.timer<=0){c.timer=0;c.skill=0;resolveCapture();}
 }
 function finishCapture(e,n){
   const d=SPECIES_2[e.type]||SPECIES_2.butterfly;if(!e.variant)e.variant=variantFor(e.type);const key=e.variant?`${e.type}:${e.variant}`:e.type;
