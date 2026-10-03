@@ -17,3 +17,7 @@ export function moveAxis() {
 export function isRunning() {
   return isDown('Shift');
 }
+
+export function clearKeys() {
+  keys.clear();
+}
