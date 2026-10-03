@@ -5,6 +5,7 @@ import { notify } from '../render/notify.js';
 import { AudioManager } from './audio.js';
 
 const RESPAWN_JITTER = 0.35;
+const BASE_RESOURCE_CAPACITY = 20;
 
 export function ensureProgression(){
   save.progression ??= { xp:0, level:1, resources:{}, crafted:{}, upgrades:{}, stats:{gathered:0,crafted:0,steps:0} };
@@ -36,20 +37,27 @@ export function addXp(amount, reason=''){
 
 function resourceAmount(id){ return save.progression.resources[id]||0; }
 function addResource(id,amount=1){ ensureProgression(); save.progression.resources[id]=(save.progression.resources[id]||0)+amount; }
+export function resourceCapacity(){
+  ensureProgression();
+  let cap=BASE_RESOURCE_CAPACITY;
+  if(save.progression.upgrades.pocket)cap+=8;
+  if(save.progression.upgrades.van_storage)cap+=20;
+  return cap;
+}
+export function resourceLoad(){ensureProgression();return Object.values(save.progression.resources).reduce((sum,n)=>sum+(Number(n)||0),0);}
+export function resourceSpace(){return Math.max(0,resourceCapacity()-resourceLoad());}
 
 export function spawnResources(){
   ensureProgression();
   state.resources=[];
   const map=state.map;
-  const specs=map==='cave'?[
-    ['crystal',1450,1800,8],['ore',700,3500,10],['mushroom',900,3200,7]
-  ]:[
-    ['wood',180,5100,18],['fiber',700,5000,17],['mushroom',2400,5100,7],['ore',3500,5000,7]
-  ];
+  const specs=map==='cave'?
+    [['crystal',1450,1800,8],['ore',700,3500,10],['mushroom',900,3200,7]]:
+    [['wood',180,5100,18],['fiber',700,5000,17],['mushroom',2400,5100,7],['ore',3500,5000,7]];
   for(const [type,from,to,count] of specs){
     const data=RESOURCE_TYPES[type];
     for(let i=0;i<count;i++){
-      let x=from+((i*791+type.length*137)%Math.max(1,to-from));
+      const x=from+((i*791+type.length*137)%Math.max(1,to-from));
       const zone=zoneAt(map,x);
       if(data.zones.includes(zone)||map==='cave'&&data.zones.includes(zone)) state.resources.push({id:`${type}-${i}`,type,x,y:type==='wood'?500:525,alive:true,respawn:0,phase:i*.8});
     }
@@ -72,14 +80,17 @@ export function gatherNearest(){
   const r=nearestResource();
   if(!r)return false;
   const data=RESOURCE_TYPES[r.type];
+  const space=resourceSpace();
+  if(space<=0){notify(`Mochila cheia · ${resourceLoad()}/${resourceCapacity()} recursos.`);AudioManager.playSFX('error');return false;}
   const bonus=save.progression.upgrades.pocket?1:0;
-  const amount=1+(Math.random()<.22?1:0)+bonus;
+  const wanted=1+(Math.random()<.22?1:0)+bonus;
+  const amount=Math.min(space,wanted);
   addResource(r.type,amount);r.alive=false;r.respawn=data.respawn*(0.9+Math.random()*RESPAWN_JITTER);
   save.progression.stats.gathered += amount;
   addXp(7+amount*2,`coleta:${r.type}`);
   addParticles(r.x,r.y,data.color,12);
   AudioManager.playSFX('collect');
-  notify(`${data.icon} +${amount} ${data.name}`);
+  notify(`${data.icon} +${amount} ${data.name} · ${resourceLoad()}/${resourceCapacity()}`);
   saveGame();return true;
 }
 
@@ -110,7 +121,7 @@ export function buyUpgrade(id){
   save.coins-=up.cost;save.progression.upgrades[id]=true;addXp(20,'upgrade');notify(`⬆ ${up.name} instalado.`);saveGame();return true;
 }
 
-export function progressSummary(){ensureProgression();const lvl=save.progression.level;const prev=LEVELS[lvl-1]||0;const next=LEVELS[lvl]||LEVELS.at(-1);return {level:lvl,xp:save.progression.xp,next,nextDelta:Math.max(0,next-save.progression.xp),ratio:next===prev?1:Math.min(1,(save.progression.xp-prev)/(next-prev))};}
+export function progressSummary(){ensureProgression();const lvl=save.progression.level;const prev=LEVELS[lvl-1]||0;const next=LEVELS[lvl]||LEVELS.at(-1);return {level:lvl,xp:save.progression.xp,next,nextDelta:Math.max(0,next-save.progression.xp),ratio:next===prev?1:Math.min(1,(save.progression.xp-prev)/(next-prev)),capacity:resourceCapacity(),load:resourceLoad()};}
 
 export function drawResources(ctx,wx){
   for(const r of state.resources||[]){if(!r.alive)continue;const d=RESOURCE_TYPES[r.type],x=wx(r.x),y=r.y+Math.sin(state.t*1.4+r.phase)*2;ctx.save();ctx.globalAlpha=.96;ctx.shadowColor=d.color;ctx.shadowBlur=8;ctx.fillStyle=d.color;
