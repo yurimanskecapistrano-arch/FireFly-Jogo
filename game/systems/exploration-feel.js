@@ -1,21 +1,32 @@
 /* =========================================================
    EXPLORATION FEEL — pistas naturais para curiosidade
    ========================================================= */
-import {state} from '../core/state.js';
+import {state,isNight} from '../core/state.js';
 import {save} from './save.js';
+import {LANDMARKS,SECRETS} from '../data/world-4-data.js';
+import {weatherType} from './weather.js';
 
 function discovered(id){
   if(id.startsWith('landmark-')) return !!save.world?.landmarks?.[id.slice(9)];
   if(id.startsWith('secret-')) return !!save.world?.secrets?.[id.slice(7)];
   return true;
 }
+function available(id){
+  const source=id.startsWith('landmark-')?LANDMARKS.find(v=>v.id===id.slice(9)):SECRETS.find(v=>v.id===id.slice(7));
+  if(!source)return false;
+  if(source.condition==='night'&&!isNight())return false;
+  if(source.condition==='rain'&&weatherType()!=='rain')return false;
+  if(source.requires==='night'&&!isNight())return false;
+  if(source.requires==='lantern'&&!save.inventory?.lantern)return false;
+  return true;
+}
 
 export function nearestDiscovery(maxDistance=430){
-  if(!['forest','cave'].includes(state.map)) return null;
+  if(!['forest','cave'].includes(state.map))return null;
   const p=state.player;
   let best=null,bestD=maxDistance;
   for(const item of state.interactables){
-    if(item.map!==state.map||!item.id.startsWith('landmark-')&&!item.id.startsWith('secret-')||discovered(item.id)) continue;
+    if(item.map!==state.map||(!item.id.startsWith('landmark-')&&!item.id.startsWith('secret-'))||discovered(item.id)||!available(item.id))continue;
     const d=Math.hypot(item.x-p.x,(item.y-p.y)*.7);
     if(d<bestD){best=item;bestD=d;}
   }
