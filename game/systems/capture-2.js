@@ -17,7 +17,7 @@ function net(){
 function distance(e,p){return Math.hypot(e.x-p.x,e.y-p.y);}
 function variantFor(type){
   const data=SPECIES_2[type];if(!data?.variants?.length)return null;
-  const rollChance=.18+(save.inventory.luckyCharm?.08:0);
+  const rollChance=.18+(save.inventory.luckyCharm ? .08 : 0);
   if(Math.random()>rollChance)return null;
   return data.variants[Math.floor(Math.random()*data.variants.length)];
 }
