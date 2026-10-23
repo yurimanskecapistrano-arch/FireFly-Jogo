@@ -8,7 +8,12 @@ if (!canvas) {
   throw new Error('FireFly: elemento #game não encontrado no index.html.');
 }
 
-export const ctx = canvas.getContext('2d');
+// Render at 320×180, then upscale with nearest-neighbour for a chunky pixel look.
+canvas.width = 320;
+canvas.height = 180;
+export const ctx = canvas.getContext('2d', { alpha: false });
+ctx.imageSmoothingEnabled = false;
+ctx.scale(4, 4);
 export const $ = (selector) => document.querySelector(selector);
 
 export const ui = {
