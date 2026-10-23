@@ -13,7 +13,7 @@ canvas.width = 320;
 canvas.height = 180;
 export const ctx = canvas.getContext('2d', { alpha: false });
 ctx.imageSmoothingEnabled = false;
-ctx.scale(4, 4);
+ctx.scale(0.25, 0.25);
 export const $ = (selector) => document.querySelector(selector);
 
 export const ui = {
