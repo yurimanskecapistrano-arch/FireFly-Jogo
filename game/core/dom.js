@@ -11,7 +11,7 @@ if (!canvas) {
 // Render at 320×180, then upscale with nearest-neighbour for a chunky pixel look.
 canvas.width = 320;
 canvas.height = 180;
-export const ctx = canvas.getContext('2d', { alpha: false });
+export const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 ctx.scale(0.25, 0.25);
 export const $ = (selector) => document.querySelector(selector);
