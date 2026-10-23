@@ -1,9 +1,25 @@
 /* =========================================================
    RENDER 4.0 — mundo vivo + atmosfera
    ========================================================= */
-import {ctx,ui} from '../core/dom.js';import {state} from '../core/state.js';import {W,H,MAP_LIMITS} from '../core/constants.js';import {save} from '../systems/save.js';import {quest} from '../systems/quests.js';import {wx,txt,poly} from './draw-helpers.js';import {sky,ground,tree,lake,caveEntrance,caveWorld,drawVan,drawTito,flower,drawForestRocks,forestDetails} from '../world/scenery.js';import {drawPlayer} from '../entities/player.js';import {drawCreature} from '../entities/creatures.js';import {activeInteractable} from '../world/maps.js';import {nearestResource,drawResources,progressSummary} from '../systems/progression.js';import {npcInfo} from '../systems/living-world.js';import {weatherType,weatherVisibility} from '../systems/weather.js';
+import {ctx,ui} from '../core/dom.js';import {state} from '../core/state.js';import {W,H,MAP_LIMITS} from '../core/constants.js';import {save} from '../systems/save.js';import {quest} from '../systems/quests.js';import {wx,txt,poly} from './draw-helpers.js';import {sky,ground,tree,lake,caveEntrance,caveWorld,drawVan,drawTito,flower,drawForestRocks,forestDetails} from '../world/scenery.js';import {drawPlayer} from '../entities/player.js';import {drawPixelWorld,drawPixelForeground} from './pixel-art.js';import {drawCreature} from '../entities/creatures.js';import {activeInteractable} from '../world/maps.js';import {nearestResource,drawResources,progressSummary} from '../systems/progression.js';import {npcInfo} from '../systems/living-world.js';import {weatherType,weatherVisibility} from '../systems/weather.js';
 const TAU=Math.PI*2;
-export function render(){ctx.save();sky();if(state.map==='lobby')drawLobbyScene();else if(state.map==='village')drawVillageScene();else{ground();if(state.map==='forest')drawForest();else if(state.map==='cave')drawCave();}drawPlayer();for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}if(state.map==='cave')drawDarkness();drawWeatherOverlay();ctx.restore();drawInteraction();renderQuestHud();renderFishingHud();renderProgressHud();if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#102630';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
+export function render(){
+  ctx.save();
+  drawPixelWorld();
+  if(state.map==='village')drawVillageNPCs3();
+  if(state.map==='forest'||state.map==='cave'){
+    drawResources(ctx,wx);
+    state.entities.filter(e=>e.alive).forEach(e=>drawCreature(e,ctx,state.t));
+  }
+  drawPlayer();
+  drawPixelForeground();
+  for(const p of state.particles){ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(wx(p.x),p.y,p.size,p.size);ctx.globalAlpha=1;}
+  if(state.map==='cave')drawDarkness();
+  drawWeatherOverlay();
+  ctx.restore();
+  drawInteraction();renderQuestHud();renderFishingHud();renderProgressHud();
+  if(state.fade.value>0){ctx.globalAlpha=Math.min(1,state.fade.value);ctx.fillStyle='#263e3b';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+}
 function drawWeatherOverlay(){if(!['forest','cave'].includes(state.map))return;const w=weatherType();if(w==='fog'){ctx.save();ctx.fillStyle='#dbe7df';ctx.globalAlpha=.11;ctx.fillRect(0,320,W,H-320);for(let i=0;i<7;i++){ctx.globalAlpha=.025;ctx.beginPath();ctx.ellipse((i*210+state.t*10)%W,450+(i%3)*45,170,34,0,0,TAU);ctx.fill();}ctx.restore();}else if(w==='cloudy'){ctx.save();ctx.fillStyle='#43585b';ctx.globalAlpha=.10;ctx.fillRect(0,0,W,425);ctx.restore();}else if(w==='rain'){ctx.save();ctx.fillStyle='#6f8990';ctx.globalAlpha=.07;ctx.fillRect(0,0,W,H);ctx.restore();}const v=weatherVisibility();if(v<1){ctx.save();ctx.globalAlpha=.08;ctx.fillStyle='#d9e6df';ctx.fillRect(0,0,W,H);ctx.restore();}}
 function drawLobbyScene(){drawLobbyGround();for(const [x,y,s,v] of [[110,350,.72,0],[330,345,.64,1],[1030,350,.72,0],[1190,350,.64,1]])tree(x,y,s,v);path(70,1210,560);building(560,420,170,92,'LOJINHA','shop');building(790,420,210,92,'GARAGEM FIREFLY','van');drawVan();ctx.fillStyle='#7c9b65';ctx.fillRect(wx(970),438,150,8);txt('PONTO DE PARTIDA',wx(380),395,10,'#fff1c9','center');gate(1150,515,'← VILA LUMINA');txt('Pegue a van para planejar sua expedição',wx(790),555,9,'#e9edcf','center');}
 function drawLobbyGround(){ctx.fillStyle='#315744';ctx.fillRect(0,425,W,H-425);ctx.fillStyle='#56815a';ctx.fillRect(0,462,W,H-462);for(let i=0;i<16;i++){const x=wx((i*211)%1250);ctx.fillStyle=i%2?'#6d995f44':'#254e4528';ctx.beginPath();ctx.ellipse(x,520+(i%4)*22,95+(i%3)*20,22,0,0,TAU);ctx.fill();}for(let x=-10;x<W+30;x+=27){ctx.strokeStyle='#84ad6c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,466);ctx.lineTo(x+4,456+Math.sin(state.t+x)*2);ctx.lineTo(x+8,465);ctx.stroke();}}
