@@ -51,3 +51,15 @@ O jogo usa módulos ES nativos, separados por responsabilidade:
 - Smoke test automatizado em `test/smoke.mjs`.
 
 O áudio possui uma camada preparada para assets musicais e ambientes reais; os efeitos atuais também possuem fallback sintetizado para manter o jogo funcional sem arquivos externos.
+
+## Direção de arte — FireFly 9: Pixel Garden
+
+A nova direção visual usa pixel art 2D de baixa resolução, ampliada por *nearest-neighbour* para manter pixels nítidos. O mundo preserva a câmera e os sistemas de jogo existentes, mas separa a composição visual da lógica de exploração.
+
+- `game/render/pixel-art.js`: paleta, céu, parallax, vegetação em blocos, caminhos, lago, construções, caverna e sprite do explorador.
+- `game/render/world.js`: coordena a ordem de desenho e continua responsável por HUD contextual, missões, recursos, criaturas e clima.
+- `game/entities/player.js`: mantém movimento e colisões; delega somente a representação visual ao sprite pixel art.
+- `game/core/dom.js`: renderiza a lógica de 1280×720 em um buffer 320×180; o navegador amplia o canvas sem suavizar os pixels.
+- `styles.css`: paleta de interface inspirada em musgo, madeira clara, menta e luz de vaga-lumes.
+
+**Princípio:** redesenhar a apresentação sem reescrever captura, pesca, progressão, inventário, missões ou salvamento. A direção visual deve continuar legível durante a exploração e em telas menores.
