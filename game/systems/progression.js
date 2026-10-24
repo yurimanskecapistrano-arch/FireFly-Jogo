@@ -82,7 +82,7 @@ export function drawResources(ctx,wx){
       tile(x+4,y-32,8,4,'#f5dfc9');
       tile(x+12,y-24,4,4,'#f5dfc9');
       tile(x-20,y-16,8,4,'#9a5f80');
-    }else{
+    }else if(r.type==='fiber'){
       // Lunar fiber: three distinct leaf clusters rather than a generic block.
       tile(x-4,y-12,8,16,'#527d4d');
       tile(x-16,y-28,16,12,'#6eaa68');
