@@ -1,6 +1,6 @@
 /* ============================================================
    FIREFLY 9 — PIXEL GARDEN
-   Renderer low-resolution: 320x180, displayed with nearest-neighbour.
+   Renderer low-resolution: 640x360, displayed with nearest-neighbour.
    Art direction: cozy woodland, muted mint, moss, butter yellow,
    lake teal, warm timber and tiny readable pixel clusters.
    ============================================================ */
