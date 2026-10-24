@@ -470,7 +470,7 @@ function drawSpritePattern(pattern,palette,offsetX=-32,offsetY=-38){
     for(let col=0;col<line.length;col++){
       const token=line[col];
       if(token===" "||token===".")continue;
-      const color=palette[token]||palette.b;
+      const color=(token==="Y"?palette.y:token==="W"?palette.w:palette[token])||palette.b;
       box(offsetX+col*4,offsetY+row*4,4,4,color);
     }
   }
