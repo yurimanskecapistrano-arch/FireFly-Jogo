@@ -33,21 +33,69 @@ export function craft(id){ensureProgression();const recipe=RECIPES.find(r=>r.id=
 export function buyUpgrade(id){ensureProgression();const up=UPGRADES.find(u=>u.id===id);if(!up)return false;if(save.progression.level<up.level){notify(`🔒 Requer nível ${up.level}.`);return false;}if(save.progression.upgrades[id]){notify('Upgrade já instalado.');return false;}if(save.coins<up.cost){notify('Moedas insuficientes.');return false;}save.coins-=up.cost;save.progression.upgrades[id]=true;addXp(20,'upgrade');notify(`⬆ ${up.name} instalado.`);saveGame();return true;}
 export function progressSummary(){ensureProgression();const lvl=save.progression.level;const prev=LEVELS[lvl-1]||0;const next=LEVELS[lvl]||LEVELS.at(-1);return{level:lvl,xp:save.progression.xp,next,nextDelta:Math.max(0,next-save.progression.xp),ratio:next===prev?1:Math.min(1,(save.progression.xp-prev)/(next-prev)),capacity:resourceCapacity(),load:resourceLoad()};}
 export function drawResources(ctx,wx){
-  const tile=(x,y,w,h,color)=>{const s=n=>Math.round(n/4)*4;ctx.fillStyle=color;ctx.fillRect(s(x),s(y),Math.max(4,s(w)),Math.max(4,s(h)));};
+  const px=n=>Math.round(n/4)*4;
+  const tile=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(px(x),px(y),Math.max(4,px(w)),Math.max(4,px(h)));};
   for(const r of state.resources||[]){
     if(!r.alive)continue;
-    const d=RESOURCE_TYPES[r.type],x=wx(r.x),y=Math.round((r.y+Math.sin(state.t*1.4+r.phase)*2)/4)*4;
+    const d=RESOURCE_TYPES[r.type],x=wx(r.x),y=px(r.y+Math.sin(state.t*1.4+r.phase)*1.5);
     ctx.save();
-    tile(x-20,y+2,40,6,'#355345');
+    // Tiny ground shadow, shared by every collectible.
+    tile(x-18,y+3,36,5,'#49654a');
     if(r.type==='wood'){
-      tile(x-12,y-34,24,36,'#8b684a');tile(x-8,y-34,8,28,'#bd9165');tile(x-20,y-42,40,12,'#bd9165');tile(x-16,y-46,32,8,'#d5b185');tile(x-8,y-38,16,4,'#78563f');
-    }else if(r.type==='crystal'||r.type==='ore'){
-      const c=r.type==='crystal'?d.color:'#9a9b99';tile(x-4,y-50,12,50,c);tile(x-16,y-34,12,34,c);tile(x+8,y-26,12,26,c);tile(x-4,y-46,4,34,'#e0f4d8');tile(x-16,y-30,4,18,'#d2e7d4');tile(x-20,y-4,40,4,'#4e6e64');
+      // Warm log with bark, cut ends and visible growth rings.
+      tile(x-24,y-20,48,20,'#76513e');
+      tile(x-20,y-24,40,20,'#a97850');
+      tile(x-16,y-20,32,12,'#c99665');
+      tile(x-24,y-16,8,12,'#d8b17a');
+      tile(x-20,y-16,4,8,'#f0d4a0');
+      tile(x+16,y-16,8,12,'#d8b17a');
+      tile(x+20,y-16,4,8,'#f0d4a0');
+      tile(x-12,y-4,24,4,'#8a5e43');
+      tile(x-8,y-12,4,4,'#e3bc82');
+    }else if(r.type==='crystal'){
+      // Three facets: teal shadow, mint body and a pale reflected edge.
+      tile(x-4,y-48,12,8,'#6bb9b5');
+      tile(x-8,y-40,20,8,'#8edbd0');
+      tile(x-12,y-32,28,16,'#6fc4bd');
+      tile(x-8,y-16,20,12,'#4b999e');
+      tile(x-20,y-28,12,20,'#5ca9ad');
+      tile(x+12,y-36,12,24,'#b9f0d9');
+      tile(x-4,y-40,4,24,'#e4f7d7');
+      tile(x-12,y-8,32,4,'#3d747b');
+    }else if(r.type==='ore'){
+      // Rounded stone cluster, with warm mineral flecks.
+      tile(x-16,y-24,32,8,'#6c7776');
+      tile(x-24,y-16,48,16,'#858e87');
+      tile(x-20,y,40,4,'#535f5c');
+      tile(x-12,y-28,24,8,'#aeb7a6');
+      tile(x-12,y-16,8,8,'#c5bd98');
+      tile(x+4,y-12,8,4,'#d8c98f');
+      tile(x-4,y-8,4,4,'#a5b6a5');
     }else if(r.type==='mushroom'){
-      tile(x-8,y-20,16,20,'#f1dfbf');tile(x-20,y-26,40,12,d.color);tile(x-12,y-34,24,8,d.color);tile(x-12,y-24,8,4,'#f4e6c9');tile(x+8,y-22,4,4,'#f4e6c9');
+      // A soft cream stalk and a rosy, clustered cap with spots.
+      tile(x-8,y-20,16,20,'#e9d9b8');
+      tile(x-12,y-12,24,8,'#f5e8cc');
+      tile(x-24,y-28,48,12,'#b77b9b');
+      tile(x-20,y-36,40,8,'#d69bb7');
+      tile(x-8,y-40,24,4,'#e8b6ca');
+      tile(x-16,y-28,8,4,'#f5dfc9');
+      tile(x+4,y-32,8,4,'#f5dfc9');
+      tile(x+12,y-24,4,4,'#f5dfc9');
+      tile(x-20,y-16,8,4,'#9a5f80');
     }else{
-      tile(x-24,y-16,48,12,d.color);tile(x-16,y-24,32,8,d.color);tile(x-4,y-20,8,8,'#f5e7a8');tile(x-4,y-8,8,20,'#497b51');
+      // Lunar fiber: three distinct leaf clusters rather than a generic block.
+      tile(x-4,y-12,8,16,'#527d4d');
+      tile(x-16,y-28,16,12,'#6eaa68');
+      tile(x-24,y-32,12,8,'#9dcb82');
+      tile(x+4,y-36,16,12,'#83b96f');
+      tile(x+12,y-28,12,8,'#b5d991');
+      tile(x-4,y-44,8,12,'#c7e2a0');
+      tile(x-20,y-20,12,8,'#47734b');
+      tile(x+8,y-20,16,8,'#5c965b');
+      tile(x-4,y-4,8,8,'#d8bd7c');
     }
+    // One tiny highlight pixel gives each object a consistent light direction.
+    if(r.type!=='fiber')tile(x+20,y-32,4,4,'#f2e7c6');
     ctx.restore();
   }
 }
