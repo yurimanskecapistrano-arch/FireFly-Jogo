@@ -1,1 +1,37 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#07171b"/><title>FireFly — Expedições ao Desconhecido</title><link rel="stylesheet" href="styles.css"/></head><body><main id="gameShell" aria-label="FireFly, jogo de exploração e captura"><canvas id="game" width="1280" height="720" tabindex="0" aria-label="Mundo do FireFly"></canvas><section id="hud" aria-label="Interface do jogo"><div class="brand"><strong>FIREFLY</strong><span>EXPEDIÇÕES AO DESCONHECIDO</span></div><div class="status"><span id="time">DIA</span><span class="coins"><b id="coins">25</b> CR</span><button id="mute" aria-label="Ativar ou desativar som">SOM</button></div><div class="tool"><i></i><div><b>REDE DE FIOS</b><small id="prompt">Explore a vila</small></div></div><div class="controls-hint"><span>WASD</span><small>mover</small><span>SHIFT</span><small>correr</small><span>E</span><small>interagir</small></div><nav class="keys" aria-label="Menus"><button data-panel="bag"><b>I</b><small>MOCHILA</small></button><button data-panel="book"><b>B</b><small>BESTIÁRIO</small></button><button data-panel="quest"><b>M</b><small>MISSÕES</small></button><button data-panel="progress"><b>P</b><small>PROGRESSO</small></button><button data-panel="map"><b>J</b><small>MAPA</small></button></nav></section><aside id="panel" class="hidden"></aside><div id="dialog" class="hidden"></div><div id="toast" role="status"></div></main><script type="module" src="game/main.js"></script></body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#07171b"/><title>FireFly — Expedições ao Desconhecido</title><link rel="stylesheet" href="styles.css"/></head><body><main id="gameShell" aria-label="FireFly, jogo de exploração e captura"><section id="titleScreen" class="title-screen" aria-label="Tela inicial FireFly">
+  <div class="title-sky" aria-hidden="true">
+    <span class="title-star star-a">✦</span><span class="title-star star-b">✧</span><span class="title-star star-c">✦</span><span class="title-star star-d">·</span>
+    <div class="title-moon"></div>
+    <div class="title-hill hill-back"></div><div class="title-hill hill-front"></div>
+    <div class="title-tree tree-left"><i></i><i></i><i></i></div><div class="title-tree tree-right"><i></i><i></i><i></i></div>
+    <svg class="cover-creature" viewBox="0 0 240 190" role="img" aria-label="Uma pequena mariposa luminosa sobre uma clareira">
+      <defs><linearGradient id="wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4bd"/><stop offset="1" stop-color="#e6b8d6"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#fff2a8" stop-opacity=".75"/><stop offset="1" stop-color="#fff2a8" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="120" cy="91" r="82" fill="url(#glow)"/>
+      <g stroke="#554b5b" stroke-width="5" stroke-linejoin="round">
+        <path d="M108 80 C75 24 30 40 48 83 C61 112 87 111 109 101Z" fill="url(#wing)"/>
+        <path d="M132 80 C165 24 210 40 192 83 C179 112 153 111 131 101Z" fill="url(#wing)"/>
+        <path d="M111 99 C75 100 70 130 91 139 C108 143 116 121 118 105Z" fill="#d8b5dc"/>
+        <path d="M129 99 C165 100 170 130 149 139 C132 143 124 121 122 105Z" fill="#d8b5dc"/>
+        <ellipse cx="120" cy="95" rx="15" ry="30" fill="#f6d979"/>
+        <circle cx="120" cy="72" r="15" fill="#f4d8a5"/>
+        <path d="M114 61 Q99 43 99 36 M126 61 Q141 43 141 36" fill="none" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="115" cy="72" r="3.5" fill="#4a414f" stroke="none"/><circle cx="125" cy="72" r="3.5" fill="#4a414f" stroke="none"/>
+        <path d="M116 80 Q120 84 124 80" fill="none" stroke-width="2.5"/>
+        <path d="M73 70 l-8 -6 M164 69 l9 -7 M94 115 l-5 7 M147 116 l5 7" fill="none" stroke="#fff4cf" stroke-width="3"/>
+      </g>
+      <g fill="#fff0a5"><circle cx="36" cy="109" r="3"/><circle cx="203" cy="115" r="3"/><circle cx="64" cy="30" r="2"/><circle cx="178" cy="39" r="2"/></g>
+    </svg>
+    <div class="title-flowers flowers-left"><i>✿</i><i>✾</i><i>✿</i></div><div class="title-flowers flowers-right"><i>✿</i><i>✾</i><i>✿</i></div>
+    <div class="title-grass"></div>
+  </div>
+  <div class="title-copy">
+    <div class="title-eyebrow"><span></span> UM MUNDO PEQUENO, CHEIO DE SEGREDOS <span></span></div>
+    <div class="title-logo"><span class="logo-spark">✦</span><h1>firefly</h1><span class="logo-spark">✦</span></div>
+    <p class="title-tagline">Pequenas grandes descobertas.</p>
+    <p class="title-description">Explore florestas encantadas, conheça criaturas raras<br class="desktop-break"/> e encontre beleza nas coisas que quase passam despercebidas.</p>
+    <button id="startGame" class="start-button" type="button" aria-keyshortcuts="Enter Space"><span class="play-triangle">▶</span> COMEÇAR A JORNADA <span class="start-arrow">↗</span></button>
+    <div class="title-controls"><span class="keycap">ENTER</span><span class="keycap">ESPAÇO</span><small>ou toque no botão para começar</small></div>
+    <div class="title-footnote"><span>✿</span> EXPLORE NO SEU RITMO <span>✿</span></div>
+  </div>
+  <div class="title-bottom"><span>FIREFLY FIELD JOURNAL</span><span>EDIÇÃO DE EXPLORAÇÃO · Nº 001</span></div>
+</section><canvas id="game" width="1280" height="720" tabindex="0" aria-label="Mundo do FireFly"></canvas><section id="hud" aria-label="Interface do jogo"><div class="brand"><span class="brand-mark" aria-hidden="true">✿</span><div><strong>firefly</strong><span>PEQUENAS GRANDES DESCOBERTAS</span></div></div><div id="locationBadge" class="location-badge" aria-live="polite"><span class="location-pin" aria-hidden="true">✦</span><div><strong id="locationTitle">Acampamento Firefly</strong><small id="locationSub">Sua aventura começa aqui</small></div></div><div class="status"><span id="time">DIA</span><span class="coins"><b id="coins">25</b> CR</span><button id="mute" aria-label="Ativar ou desativar som">SOM</button></div><div class="tool"><i></i><div><b>REDE DE FIOS</b><small id="prompt">Explore a vila</small></div></div><div class="controls-hint"><span>WASD</span><small>mover</small><span>SHIFT</span><small>correr</small><span>E</span><small>interagir</small></div><nav class="keys" aria-label="Menus"><button data-panel="bag"><b>I</b><small>MOCHILA</small></button><button data-panel="book"><b>B</b><small>BESTIÁRIO</small></button><button data-panel="quest"><b>M</b><small>MISSÕES</small></button><button data-panel="progress"><b>P</b><small>PROGRESSO</small></button><button data-panel="map"><b>J</b><small>MAPA</small></button></nav></section><aside id="panel" class="hidden"></aside><div id="dialog" class="hidden"></div><div id="toast" role="status"></div></main><script type="module" src="game/main.js"></script></body></html>

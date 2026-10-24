@@ -32,4 +32,70 @@ function payCost(cost){for(const [id,n] of Object.entries(cost))save.progression
 export function craft(id){ensureProgression();const recipe=RECIPES.find(r=>r.id===id);if(!recipe)return false;if(save.progression.level<recipe.unlockLevel){notify(`🔒 Requer nível ${recipe.unlockLevel}.`);return false;}if(save.progression.crafted[id]){notify('Você já fabricou este item.');return false;}if(!hasCost(recipe.cost)){notify('Faltam materiais para fabricar isso.');return false;}payCost(recipe.cost);save.progression.crafted[id]=true;save.progression.stats.crafted++;if(id==='better_net')save.inventory.reinforcedNet=1;if(id==='lantern')save.inventory.lantern=1;if(id==='exploration_kit')save.inventory.explorationKit=1;if(id==='lucky_charm')save.inventory.luckyCharm=1;if(id==='master_net')save.inventory.masterNet=1;addXp(30+recipe.unlockLevel*8,'craft');notify(`🔧 ${recipe.name} fabricada!`);AudioManager.playSFX('success');saveGame();return true;}
 export function buyUpgrade(id){ensureProgression();const up=UPGRADES.find(u=>u.id===id);if(!up)return false;if(save.progression.level<up.level){notify(`🔒 Requer nível ${up.level}.`);return false;}if(save.progression.upgrades[id]){notify('Upgrade já instalado.');return false;}if(save.coins<up.cost){notify('Moedas insuficientes.');return false;}save.coins-=up.cost;save.progression.upgrades[id]=true;addXp(20,'upgrade');notify(`⬆ ${up.name} instalado.`);saveGame();return true;}
 export function progressSummary(){ensureProgression();const lvl=save.progression.level;const prev=LEVELS[lvl-1]||0;const next=LEVELS[lvl]||LEVELS.at(-1);return{level:lvl,xp:save.progression.xp,next,nextDelta:Math.max(0,next-save.progression.xp),ratio:next===prev?1:Math.min(1,(save.progression.xp-prev)/(next-prev)),capacity:resourceCapacity(),load:resourceLoad()};}
-export function drawResources(ctx,wx){for(const r of state.resources||[]){if(!r.alive)continue;const d=RESOURCE_TYPES[r.type],x=wx(r.x),y=r.y+Math.sin(state.t*1.4+r.phase)*2;ctx.save();ctx.globalAlpha=.96;ctx.shadowColor=d.color;ctx.shadowBlur=8;ctx.fillStyle=d.color;if(r.type==='wood'){ctx.fillRect(x-10,y-35,20,35);ctx.fillStyle='#d19a69';ctx.beginPath();ctx.arc(x,y-39,13,0,Math.PI*2);ctx.fill();}else if(r.type==='crystal'||r.type==='ore'){ctx.beginPath();ctx.moveTo(x,y-40);ctx.lineTo(x+14,y-17);ctx.lineTo(x+5,y);ctx.lineTo(x-12,y);ctx.lineTo(x-15,y-22);ctx.closePath();ctx.fill();}else if(r.type==='mushroom'){ctx.fillStyle='#ead7bf';ctx.fillRect(x-3,y-18,6,18);ctx.fillStyle=d.color;ctx.beginPath();ctx.arc(x,y-20,13,Math.PI,0);ctx.fill();}else{ctx.beginPath();ctx.ellipse(x,y-18,17,6,0,0,Math.PI*2);ctx.fill();ctx.fillRect(x-3,y-18,6,18);}ctx.shadowBlur=0;ctx.restore();}}
+export function drawResources(ctx,wx){
+  const px=n=>Math.round(n/4)*4;
+  const tile=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(px(x),px(y),Math.max(4,px(w)),Math.max(4,px(h)));};
+  for(const r of state.resources||[]){
+    if(!r.alive)continue;
+    const d=RESOURCE_TYPES[r.type],x=wx(r.x),y=px(r.y+Math.sin(state.t*1.4+r.phase)*1.5);
+    ctx.save();
+    // Tiny ground shadow, shared by every collectible.
+    tile(x-18,y+3,36,5,'#49654a');
+    if(r.type==='wood'){
+      // Warm log with bark, cut ends and visible growth rings.
+      tile(x-24,y-20,48,20,'#76513e');
+      tile(x-20,y-24,40,20,'#a97850');
+      tile(x-16,y-20,32,12,'#c99665');
+      tile(x-24,y-16,8,12,'#d8b17a');
+      tile(x-20,y-16,4,8,'#f0d4a0');
+      tile(x+16,y-16,8,12,'#d8b17a');
+      tile(x+20,y-16,4,8,'#f0d4a0');
+      tile(x-12,y-4,24,4,'#8a5e43');
+      tile(x-8,y-12,4,4,'#e3bc82');
+    }else if(r.type==='crystal'){
+      // Three facets: teal shadow, mint body and a pale reflected edge.
+      tile(x-4,y-48,12,8,'#6bb9b5');
+      tile(x-8,y-40,20,8,'#8edbd0');
+      tile(x-12,y-32,28,16,'#6fc4bd');
+      tile(x-8,y-16,20,12,'#4b999e');
+      tile(x-20,y-28,12,20,'#5ca9ad');
+      tile(x+12,y-36,12,24,'#b9f0d9');
+      tile(x-4,y-40,4,24,'#e4f7d7');
+      tile(x-12,y-8,32,4,'#3d747b');
+    }else if(r.type==='ore'){
+      // Rounded stone cluster, with warm mineral flecks.
+      tile(x-16,y-24,32,8,'#6c7776');
+      tile(x-24,y-16,48,16,'#858e87');
+      tile(x-20,y,40,4,'#535f5c');
+      tile(x-12,y-28,24,8,'#aeb7a6');
+      tile(x-12,y-16,8,8,'#c5bd98');
+      tile(x+4,y-12,8,4,'#d8c98f');
+      tile(x-4,y-8,4,4,'#a5b6a5');
+    }else if(r.type==='mushroom'){
+      // A soft cream stalk and a rosy, clustered cap with spots.
+      tile(x-8,y-20,16,20,'#e9d9b8');
+      tile(x-12,y-12,24,8,'#f5e8cc');
+      tile(x-24,y-28,48,12,'#b77b9b');
+      tile(x-20,y-36,40,8,'#d69bb7');
+      tile(x-8,y-40,24,4,'#e8b6ca');
+      tile(x-16,y-28,8,4,'#f5dfc9');
+      tile(x+4,y-32,8,4,'#f5dfc9');
+      tile(x+12,y-24,4,4,'#f5dfc9');
+      tile(x-20,y-16,8,4,'#9a5f80');
+    }else if(r.type==='fiber'){
+      // Lunar fiber: three distinct leaf clusters rather than a generic block.
+      tile(x-4,y-12,8,16,'#527d4d');
+      tile(x-16,y-28,16,12,'#6eaa68');
+      tile(x-24,y-32,12,8,'#9dcb82');
+      tile(x+4,y-36,16,12,'#83b96f');
+      tile(x+12,y-28,12,8,'#b5d991');
+      tile(x-4,y-44,8,12,'#c7e2a0');
+      tile(x-20,y-20,12,8,'#47734b');
+      tile(x+8,y-20,16,8,'#5c965b');
+      tile(x-4,y-4,8,8,'#d8bd7c');
+    }
+    // One tiny highlight pixel gives each object a consistent light direction.
+    if(r.type!=='fiber')tile(x+20,y-32,4,4,'#f2e7c6');
+    ctx.restore();
+  }
+}
