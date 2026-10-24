@@ -80,3 +80,14 @@ A nova direção visual usa pixel art 2D de baixa resolução, ampliada por *nea
 - Fauna redesenhada com silhuetas mais simpáticas e detalhes próprios; espécies especiais e animais regionais compartilham a mesma linguagem de sprites.
 - Música procedural original com melodia pentatônica, acordes sustentados e camadas de ambiente discretas; floresta, vila, noite e caverna têm variações de clima sonoro.
 - A música e os efeitos são sintetizados localmente com Web Audio, sem depender de arquivos externos.
+
+
+## FireFly 12 — fauna e itens Pixel Garden
+
+- **Fauna:** 14 sprites com silhuetas por espécie, agrupamento de pixels consistente, paletas limitadas e pequenos movimentos de idle.
+- **Recursos:** madeira, fibra lunar, cogumelos, minério e cristais usam clusters com formas e realces próprios.
+- **Tela inicial:** entrada em camadas, mariposa animada, lua e flores com movimento discreto, atalhos Enter/Espaço e transição suave ao iniciar.
+- **Acessibilidade:** as animações respeitam a preferência do sistema por movimento reduzido.
+- **Interface:** ícones da mochila e dos equipamentos diferenciam materiais e ferramentas sem abandonar a paleta acolhedora.
+
+A regra visual desta fase é priorizar silhueta, leitura no tamanho real e consistência entre fauna, recursos e interface; detalhes só entram quando continuam claros em movimento.
