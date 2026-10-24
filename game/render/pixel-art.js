@@ -216,40 +216,296 @@ export function drawPixelWorld(){
   ctx.restore();
 }
 
-function eye(x,y){box(x-4,y-4,8,8,'#fff4d8');box(x,y-2,4,6,'#293b37');box(x+1,y-2,2,2,'#fffdf1');}
-function cheek(x,y,color='#efaaa1'){box(x,y,8,4,color);}
-function shadow(){box(-24,18,48,4,'#355345');}
+const CREATURE_SPRITES = {
+  butterfly: [
+    "....pp....yy....",
+    "...pppp..yyyy...",
+    "..ppplppyyyylyy.",
+    ".ppplllpyyylyyy.",
+    ".ppplllpyyylyyy.",
+    "..ppplppyyyylyy.",
+    "...pppp..yyyy...",
+    "....pp....yy....",
+    ".......oo.......",
+    ".......ol.......",
+    ".......ob.......",
+    ".......ob.......",
+    "......o..o......",
+    "......d..d......"
+  ],
+  frog: [
+    "....oo....oo....",
+    "...obbo..obbo...",
+    "..obllboobllbo..",
+    "..oblleboebllbo..",
+    ".obbbbbbbbbbbbo.",
+    ".obbbccccbbbbbo.",
+    ".obbcceeccebcbo.",
+    "..obbbppppbbbo..",
+    "..obbbccccbbbo..",
+    ".obboobbbbboobbo.",
+    ".obb..obbo..bbo.",
+    ".oo...o..o...oo.",
+    "...oo......oo...",
+    "...dd......dd..."
+  ],
+  lizard: [
+    "................",
+    "..........oo....",
+    ".........obbo...",
+    "....oo..obllbo..",
+    "...obbooblleebo.",
+    "..obbbbbbbllbbbo",
+    ".obbbgblbbbbbbbo",
+    ".obbbbbbbbbbbbo.",
+    "..obbbbbbbooo...",
+    "...obbbbo..o.....",
+    "..oo..oo..oo.....",
+    "..dd..dd..dd.....",
+    "................",
+    "................"
+  ],
+  spider: [
+    ".......oo.......",
+    ".......ol.......",
+    ".......ob.......",
+    "..oo...obbo...oo",
+    "...oo.obllbo.oo..",
+    "....oobbbbbboo...",
+    "...oobbeebbbboo..",
+    "..oobbbbbbbbbbo..",
+    ".ooobbbpppbbbboo.",
+    "oo..obbbbbbbbo..oo",
+    "....oo....oo......",
+    "...dd......dd.....",
+    "................",
+    "................"
+  ],
+  mouse: [
+    "....oo......oo..",
+    "...obbo....obbo.",
+    "...obllo..obllo.",
+    "....obbbbbbbbo..",
+    "...obbbllbbbbbo.",
+    "..obbbbbbbbbbbbo",
+    "..obbbccceebbbbo.",
+    "..obbbcccceebbbbo",
+    "...obbbpppbbbbbo.",
+    "....obbbbbbbbo..",
+    "...ooobbbboooo...",
+    "..dd..oo..oo.dd..",
+    ".dd...........dd.",
+    "................"
+  ],
+  bat: [
+    "oo............oo",
+    "obbo........obbo",
+    ".obbbbo....obbbbo",
+    "..obbbbo..obbbbo.",
+    "...obbbboobbbbo..",
+    "....obbbbbbbbo...",
+    ".....obllllbo....",
+    "....oblleewllbo...",
+    "...obbbbleebbbbo..",
+    "..obbbbbppbbbbbo..",
+    "..obbbbo..obbbbo...",
+    ".obbo........obbo.",
+    "................",
+    "................"
+  ],
+  owl: [
+    ".....oo..oo.....",
+    "....obboobbo....",
+    "...obbbbbbbbo...",
+    "...obllllllbo...",
+    "..oblleewellbo..",
+    "..obbleeewellbo..",
+    "..obbbllxxllbbo..",
+    "...obbbbbbbbbo...",
+    "...obbbccccbbbo...",
+    "....obccccbbo....",
+    "....obbbbbbo.....",
+    "....oo....oo.....",
+    "...dd......dd....",
+    "................"
+  ],
+  deer: [
+    "....o......o....",
+    "...oob....boo...",
+    "....ob....bo....",
+    ".....ob..bo.....",
+    "......obbo......",
+    ".....obllbo.....",
+    "....oblleebo.....",
+    "...obbbbbbbbo....",
+    "...obbbccbbbbo....",
+    "....obbbbbbbbo....",
+    "...obbo..obbo.....",
+    "...obb....bbo.....",
+    "...od......do.....",
+    "................"
+  ],
+  otter: [
+    "................",
+    "........oo......",
+    ".......obbo.....",
+    ".....oobllbo....",
+    "...oobbbbbbbbo..",
+    "..obbbllccccbbo.",
+    ".obbbbleeccccbbo.",
+    ".obbbbbpppbbbbbo.",
+    "..obbbbbbbbbbbbo.",
+    "...oobbbbbbbbo...",
+    "..oo..obbo..obbo.",
+    ".dd....oo....oo..",
+    "................",
+    "................"
+  ],
+  crystalbug: [
+    "......oo..oo....",
+    ".....obboobbo...",
+    "....obbbbbbbbo..",
+    "...obblleellbbo.",
+    "..obbbbbbbbbbbbo",
+    "..obbbblxxlbbbbbo",
+    "..obbbbbbbbbbbbo.",
+    "...obbbbbbbbbbo..",
+    "....obbo..obbo...",
+    "...oo........oo..",
+    "...dd........dd..",
+    "................",
+    "................",
+    "................"
+  ],
+  glowmoth: [
+    "....xx......xx..",
+    "...xllx....xllx.",
+    "..xxllxx..xxllxx",
+    ".xxllllxx xxllllx",
+    ".xxllllxx xxllllx",
+    "..xxllxx..xxllxx",
+    "...xllx....xllx.",
+    "....xx......xx..",
+    ".......oo.......",
+    "......obbo......",
+    "......obllbo....",
+    ".......obbo.....",
+    "......o....o....",
+    "......d....d...."
+  ],
+  firefly: [
+    "................",
+    "......yy........",
+    ".....yYy........",
+    "......yy........",
+    "....oobbo.......",
+    "...obllbbo......",
+    "...oblleebo......",
+    "...obbbbbbo......",
+    "....obbbbo.......",
+    ".....obbo........",
+    ".....o..o........",
+    ".....d..d........",
+    "................",
+    "................"
+  ],
+  cavefly: [
+    "......xx........",
+    ".....xllx.......",
+    "....xxllxx......",
+    "...xllllllx.....",
+    "..xxllllllxx....",
+    "...xllwwllx.....",
+    "....xllllx......",
+    ".....xllx.......",
+    "......oo........",
+    ".....obbo.......",
+    ".....obllbo.....",
+    "......obbo......",
+    ".....o....o.....",
+    ".....d....d....."
+  ],
+  rare: [
+    "......yy........",
+    ".....yYYy.......",
+    "....yyllYY......",
+    "...yYllllYy.....",
+    "..yyllllllYY....",
+    "...yYllwwlYy....",
+    "....yyllllYY....",
+    ".....yYllYy.....",
+    "......obbo......",
+    ".....obllbo.....",
+    ".....oblleebo....",
+    "......obbo......",
+    ".....o....o.....",
+    ".....d....d....."
+  ]
+};
+const CREATURE_PALETTES = {
+  butterfly:{o:"#554354",d:"#8b6570",b:"#d58eaa",l:"#f7c8d4",c:"#fff0dc",e:"#3d3444",w:"#fff8e8",p:"#e9a0b3",y:"#e8bf67",g:"#9ecb8a",x:"#b6d5e7"},
+  frog:{o:"#315642",d:"#3d7850",b:"#4e9a62",l:"#83c77a",c:"#d9efb0",e:"#233b36",w:"#fff7d9",p:"#ef9da4",y:"#e6d17b",g:"#b6dc91",x:"#8bd4c5"},
+  lizard:{o:"#3a5140",d:"#58794e",b:"#7da765",l:"#b2d38a",c:"#e7e6bd",e:"#263b36",w:"#fff8dc",p:"#e5a1a0",y:"#e5c979",g:"#b9d88d",x:"#6ec5ba"},
+  spider:{o:"#473e59",d:"#615270",b:"#807096",l:"#b5a2ca",c:"#e9dfef",e:"#272d3d",w:"#fff8e7",p:"#e5a0b8",y:"#f1d78c",g:"#a7c99c",x:"#94c8d5"},
+  mouse:{o:"#60474b",d:"#94716e",b:"#bd9290",l:"#e0b7ae",c:"#f8e4ce",e:"#352e3a",w:"#fff9e8",p:"#e99ca2",y:"#dfc77c",g:"#b5ce98",x:"#9ecac8"},
+  bat:{o:"#393c55",d:"#575b78",b:"#777e9d",l:"#a7b3c9",c:"#e9e5d4",e:"#292d40",w:"#fff9e9",p:"#e5a7bd",y:"#f0d889",g:"#b5c9a5",x:"#c2a8e2"},
+  owl:{o:"#485664",d:"#637b8a",b:"#8099a6",l:"#b2c9c5",c:"#f2e7cc",e:"#293b44",w:"#fff9e9",p:"#dfa6a6",y:"#e9bb69",g:"#a5c79b",x:"#d3b8e7"},
+  deer:{o:"#644b3a",d:"#8a6548",b:"#b88962",l:"#dcb58a",c:"#f6e8cb",e:"#3d3434",w:"#fff7e8",p:"#e4a4a1",y:"#e6cc81",g:"#b6d19a",x:"#c3d7ce"},
+  otter:{o:"#5b4639",d:"#7b5947",b:"#a97757",l:"#ce9870",c:"#f1ddbd",e:"#3d3333",w:"#fff7e8",p:"#e8a2a0",y:"#e4c477",g:"#a8c58e",x:"#8ec7c4"},
+  crystalbug:{o:"#365c5b",d:"#4c8a83",b:"#70c0b2",l:"#a9e5d4",c:"#e9f5d8",e:"#2a4548",w:"#fffbe8",p:"#e6a6b8",y:"#efc878",g:"#b8d98f",x:"#c6b3f1"},
+  glowmoth:{o:"#655078",d:"#a17fba",b:"#c6a1df",l:"#ead2f2",c:"#fff2e4",e:"#45364e",w:"#fffef2",p:"#efb1d2",y:"#f4dc89",g:"#b7d8b1",x:"#9e9de2"},
+  firefly:{o:"#5a6140",d:"#9b9552",b:"#e2c96d",l:"#fff0a0",c:"#fff9cf",e:"#3e4636",w:"#fffef0",p:"#f2c2a4",y:"#ffe78a",g:"#b5d98b",x:"#b4e7d4"},
+  cavefly:{o:"#39495c",d:"#617d96",b:"#82b9c8",l:"#c3f0e4",c:"#f0f6e6",e:"#2b3a4b",w:"#ffffff",p:"#d5b4ec",y:"#f4d98c",g:"#a7d5c6",x:"#bda8ed"},
+  rare:{o:"#5d4b6c",d:"#9b7bc1",b:"#c3a1eb",l:"#e9d5ff",c:"#fff3ff",e:"#463650",w:"#ffffff",p:"#f3bddc",y:"#ffe99d",g:"#c6e5b5",x:"#a6d9ed"}
+};
+const CREATURE_FALLBACK = [
+  "................","......oooo......",".....obllbo.....","....oblleebo....",
+  "...obbbbbbbbo...","...obbbccbbbo...","....obbbbbbo....",
+  ".....obbo.......","....oo..oo......","...dd....dd.....",
+  "................","................","................","................"
+];
+function drawSpritePattern(pattern,palette,offsetX=-32,offsetY=-38){
+  for(let row=0;row<pattern.length;row++){
+    const line=pattern[row];
+    for(let col=0;col<line.length;col++){
+      const token=line[col];
+      if(token===" "||token===".")continue;
+      const color=palette[token]||palette.b;
+      box(offsetX+col*4,offsetY+row*4,4,4,color);
+    }
+  }
+}
 export function drawPixelCreature(e){
- if(!e.visible)return;const X=wx(e.x),Y=snap(e.y+Math.sin(state.t*2+e.phase)*(['butterfly','firefly','glowmoth','rare','cavefly'].includes(e.type)?3:0));
- ctx.save();ctx.translate(X,Y);if(e.vx<0)ctx.scale(-1,1);const rare=e.type==='rare'||e.type==='cavefly';
- if(!['butterfly','bat','firefly','cavefly','rare','glowmoth'].includes(e.type))shadow();
- if(e.type==='butterfly'){
-  const flap=e.aiState==='landed'?0:Math.sin(state.t*13+e.phase);
-  box(-28,-12,20,16,flap>0?'#e7a2ba':'#d985a1');box(-24,-20,12,12,'#f5c9d5');box(-32,-8,8,8,'#d985a1');box(-20,0,12,8,'#d985a1');
-  box(8,-12,20,16,flap<0?'#f2d27e':'#d8b45f');box(12,-20,12,12,'#fff0b0');box(24,-8,8,8,'#d8b45f');box(12,0,12,8,'#d8b45f');
-  box(-4,-12,8,24,'#79515e');box(-4,-20,4,8,'#79515e');box(0,-24,4,8,'#79515e');box(-8,-26,4,8,'#79515e');box(4,-26,4,8,'#79515e');
- }else if(e.type==='frog'){
-  box(-24,-12,48,28,'#3f8a59');box(-20,-20,40,20,'#69b66d');box(-24,-24,16,12,'#72c77b');box(8,-24,16,12,'#72c77b');box(-20,-24,12,12,'#b8e69a');box(8,-24,12,12,'#b8e69a');eye(-12,-18);eye(12,-18);box(-12,-4,24,8,'#a6d987');cheek(-20,-4);cheek(16,-4);box(-8,0,16,4,'#386f4b');box(-28,8,16,8,'#3f8a59');box(12,8,16,8,'#3f8a59');box(-28,16,12,4,'#315e43');box(16,16,12,4,'#315e43');box(-8,4,16,4,'#e7d88f');
- }else if(e.type==='lizard'){
-  box(-28,-8,40,16,'#6d9e69');box(-12,-16,28,16,'#8fbd7a');box(12,-12,16,12,'#8fbd7a');box(20,-8,8,8,'#b5d78b');eye(20,-8);cheek(12,0,'#e5a4a0');box(-28,-4,12,8,'#547f57');box(-40,0,16,8,'#547f57');box(-52,4,16,4,'#547f57');box(-16,8,8,8,'#52784e');box(8,8,8,8,'#52784e');box(-16,12,12,4,'#dfc47e');box(8,12,12,4,'#dfc47e');for(let i=0;i<3;i++)box(-8+i*8,-4,4,4,'#c2d891');
- }else if(e.type==='spider'){
-  box(-12,-8,24,20,'#63536f');box(-8,-16,16,12,'#7d6a88');box(-16,0,32,12,'#51465e');for(let i=0;i<3;i++){box(-16-i*4,-12+i*8,12,4,'#79658a');box(8+i*4,-12+i*8,12,4,'#79658a');box(-24-i*3,-8+i*8,8,4,'#4d435a');box(16+i*3,-8+i*8,8,4,'#4d435a');}box(-8,-8,4,4,'#f4d78b');box(4,-8,4,4,'#f4d78b');box(-8,-8,2,4,'#293b37');box(4,-8,2,4,'#293b37');if(e.webX!==undefined){box(-2,-36,4,24,'#d8e2ce');box(-4,-40,8,4,'#d8e2ce');}
- }else if(e.type==='mouse'){
-  box(-20,-8,36,20,'#b08b88');box(-16,-16,28,16,'#d2a8a1');box(-20,-24,12,12,'#dba8a9');box(4,-24,12,12,'#dba8a9');box(-16,-20,4,4,'#f6d7cc');box(8,-20,4,4,'#f6d7cc');eye(12,-8);cheek(8,0,'#e99c9b');box(16,-4,8,4,'#f1c3b0');box(-24,8,12,4,'#d2a8a1');box(-36,4,12,4,'#b08b88');box(-44,0,12,4,'#b08b88');box(-8,8,8,8,'#8e6c6a');box(8,8,8,8,'#8e6c6a');
- }else if(e.type==='bat'){
-  const flap=Math.sin(state.t*12+e.phase)>0;box(-36,-12,20,16,'#655477');box(-40,-20,16,12,'#7c688e');box(-32,0,16,12,'#7c688e');box(-20,-4,12,12,'#655477');box(16,-12,20,16,'#655477');box(24,-20,16,12,'#7c688e');box(16,0,16,12,'#7c688e');box(8,-4,12,12,'#655477');if(flap){box(-44,-24,20,8,'#51445f');box(24,-24,20,8,'#51445f');}box(-12,-12,24,24,'#9c8ab0');box(-8,-16,16,8,'#b5a2c4');eye(-4,-4);eye(8,-4);box(-4,4,8,4,'#e9b9c0');box(-12,-24,8,12,'#51445f');box(4,-24,8,12,'#51445f');
- }else if(e.type==='owl'){
-  box(-20,-20,40,40,e.variant?.id==='moon'?'#a79bc9':'#788da1');box(-16,-28,12,12,'#788da1');box(4,-28,12,12,'#788da1');box(-16,-12,32,24,'#e8dfc8');eye(-8,-8);eye(8,-8);box(-4,0,8,8,'#e7b86f');box(-12,12,8,8,'#d9b77a');box(4,12,8,8,'#d9b77a');
- }else if(e.type==='deer'){
-  const fur=e.variant?.id==='white'?'#f1e8d9':'#b78b68';box(-28,-12,44,24,fur);box(-20,-20,28,12,fur);box(8,-24,12,20,fur);box(12,-36,20,20,fur);box(16,-40,8,8,'#e6bda0');box(28,-32,8,8,'#e6bda0');eye(24,-28);box(28,-20,8,4,'#493b39');box(12,-48,4,12,'#805e4b');box(8,-52,8,4,'#805e4b');box(24,-48,4,12,'#805e4b');box(24,-52,8,4,'#805e4b');box(-20,12,8,12,'#8b6650');box(-4,12,8,12,'#8b6650');box(12,12,8,12,'#8b6650');box(24,12,8,12,'#8b6650');box(-12,-8,4,4,'#f5e2bd');box(0,0,4,4,'#f5e2bd');
- }else if(e.type==='otter'){
-  box(-28,-8,44,24,e.variant?.id==='moon'?'#aa9eb7':'#9a7157');box(-20,-16,32,16,'#c08c68');box(8,-20,24,20,'#c08c68');box(24,-12,12,8,'#e0b08b');box(12,-24,8,8,'#9a7157');eye(24,-12);box(28,-8,4,4,'#3b3334');cheek(16,-4,'#e4a29a');box(-32,4,12,8,'#9a7157');box(-40,8,12,4,'#9a7157');box(-12,12,8,8,'#7b5948');box(8,12,8,8,'#7b5948');box(-4,0,12,4,'#e7c5a0');
- }else if(e.type==='crystalbug'){
-  const shell=e.variant?.id==='amber'?'#e9b66b':'#79d3d0';box(-20,-12,40,20,shell);box(-16,-20,12,12,'#c8f0e9');box(4,-20,12,12,'#c8f0e9');box(-12,-8,24,12,shell);box(-4,-12,8,20,'#e9f7e6');eye(-8,-8);eye(8,-8);box(-16,8,8,8,'#547e6b');box(8,8,8,8,'#547e6b');box(-24,-4,8,4,'#b6e9e1');box(16,-4,8,4,'#b6e9e1');
- }else if(['glowmoth','firefly','cavefly','rare'].includes(e.type)){
-  const moth=e.type==='glowmoth',special=rare||e.variant?.id==='pearl',core=special?'#d4b5f5':moth?'#c5a4e8':'#f5dd86',wing=special?'#b49be8':moth?'#e6c8f4':'#fff0b3';box(-24,-12,20,16,wing);box(-28,-20,16,12,wing);box(-24,0,16,8,special?'#a58bd8':wing);box(4,-12,20,16,wing);box(12,-20,16,12,wing);box(8,0,16,8,special?'#a58bd8':wing);box(-8,-12,16,24,core);box(-8,-16,16,8,special?'#f3e6ff':core);box(-4,-4,8,8,'#fffbe3');box(-12,-24,4,8,core);box(8,-24,4,8,core);if(moth){box(-20,8,12,4,'#9d7cbe');box(8,8,12,4,'#9d7cbe');}if(special){box(-32,-24,64,4,'#e5c8ff');box(-36,-20,4,8,'#e5c8ff');box(32,-20,4,8,'#e5c8ff');}
- }else{box(-20,-8,40,20,'#8ebd83');box(-16,-16,32,12,'#b1d69a');box(-12,-20,24,8,'#c8e5a7');eye(-8,-8);eye(8,-8);cheek(-16,0);cheek(8,0);box(-12,8,8,8,'#6f9c6b');box(4,8,8,8,'#6f9c6b');}
- ctx.restore();
+  if(!e.visible)return;
+  const flying=["butterfly","bat","firefly","cavefly","rare","glowmoth"].includes(e.type);
+  const bob=Math.sin(state.t*(flying?3.2:1.8)+e.phase)*(flying?3:1.2);
+  const X=wx(e.x),Y=snap(e.y+bob);
+  const palette={...(CREATURE_PALETTES[e.type]||CREATURE_PALETTES.frog)};
+  if(e.variant?.id==="white"){palette.b="#f1eadd";palette.d="#c8c5bd";palette.l="#fff9e9";}
+  if(e.variant?.id==="moon"){palette.b="#9e9bc5";palette.d="#777ba3";palette.l="#d0c9ed";palette.x="#d4c6f4";}
+  if(e.variant?.id==="amber"){palette.b="#e2a85b";palette.d="#b7773f";palette.l="#ffdc8c";palette.x="#f2bd6c";}
+  if(e.variant?.id==="pearl"){palette.b="#d9d7ef";palette.d="#aaa9d0";palette.l="#fff6ff";palette.x="#c7c1f4";}
+  ctx.save();
+  ctx.translate(X,Y);
+  if(e.vx<0)ctx.scale(-1,1);
+  if(!["butterfly","bat","firefly","cavefly","rare","glowmoth"].includes(e.type)){
+    box(-28,20,56,8,"#365445");
+    box(-20,20,40,4,"#4c6e51");
+  }
+  if(e.type==="butterfly"&&Math.sin(state.t*14+e.phase)>0){
+    box(-36,-30,12,12,palette.l);box(24,-30,12,12,palette.y);box(-36,-2,12,8,palette.b);box(24,-2,12,8,palette.d);
+  }
+  if(e.type==="bat"&&Math.sin(state.t*11+e.phase)>0){
+    box(-40,-18,12,16,palette.d);box(28,-18,12,16,palette.d);
+  }
+  const pattern=CREATURE_SPRITES[e.type]||CREATURE_FALLBACK;
+  drawSpritePattern(pattern,palette);
+  if(["firefly","cavefly","rare","glowmoth","crystalbug"].includes(e.type)){
+    ctx.globalAlpha=.18+Math.sin(state.t*3+e.phase)*.06;
+    box(-40,-44,80,4,palette.l);box(-44,-40,4,16,palette.l);box(40,-40,4,16,palette.l);
+    ctx.globalAlpha=1;
+  }
+  ctx.restore();
 }
 
 export function drawPixelForeground(){ctx.save();drawForeground();ctx.restore();}
