@@ -256,3 +256,18 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes copyDepart{to{opacity:0;transform:translateY(-10px)}}
 @media(max-width:760px){.title-controls{flex-wrap:wrap;gap:5px;margin-top:10px}.title-controls small{flex-basis:100%;margin:2px 0 0}.title-copy>.title-footnote{margin-top:10px}.title-description{max-width:330px}}
 @media(prefers-reduced-motion:reduce){.title-sky,.title-copy>*,.title-copy>.start-button,.cover-creature,.cover-creature g:first-of-type path,.title-moon,.title-flowers i,.start-button:before,#titleScreen.launching,#titleScreen.launching .title-sky,#titleScreen.launching .cover-creature,#titleScreen.launching .title-copy,#titleScreen.launching .title-bottom{animation:none!important;transition:none!important}.title-copy>*{opacity:1;transform:none}.title-controls{animation:none}}
+
+
+/* Small, consistent color language for inventory sprites/glyphs. */
+.panel-icon.resource{image-rendering:pixelated;box-shadow:inset 0 -3px #071b1f33}
+.panel-icon.wood{color:#f0c58b;background:#5c4036;border-color:#b7865c}
+.panel-icon.fiber{color:#bde09a;background:#294d3a;border-color:#83b76f}
+.panel-icon.crystal{color:#b9f1e0;background:#244d54;border-color:#7dcac0}
+.panel-icon.mushroom{color:#f5d2df;background:#5c3d58;border-color:#d49ab6}
+.panel-icon.ore{color:#d7d9c8;background:#3b494b;border-color:#9ba9a1}
+.panel-icon.bait{color:#f7d8a1;background:#4c5f3d;border-color:#c4d28b}
+.panel-icon.reinforcedNet{color:#d6e8d4;background:#304e4d;border-color:#8bb7a5}
+.panel-icon.lantern{color:#ffe7a1;background:#5a4a35;border-color:#e4c66e}
+.panel-icon.explorationKit{color:#d2e4b9;background:#3e5743;border-color:#a7c28c}
+.panel-icon.luckyCharm{color:#ffecac;background:#51445c;border-color:#c9b0df}
+.panel-icon.masterNet{color:#d4d7ff;background:#3b4560;border-color:#a8b6ec}
