@@ -23,5 +23,8 @@ export const ui = {
   panel: $('#panel'),
   dialog: $('#dialog'),
   toast: $('#toast'),
-  mute: $('#mute')
+  mute: $('#mute'),
+  location: $('#locationBadge'),
+  locationTitle: $('#locationTitle'),
+  locationSub: $('#locationSub')
 };
