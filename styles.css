@@ -39,3 +39,69 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .buy{background:#4c7950;border-color:#b4d09d;color:#fff0d1;border-radius:5px}
 .buy:hover{background:#638e5d}
 @media(max-width:700px){#gameShell{border-radius:0;border:0}}
+
+
+/* FIREFLY 9.1 — readable cozy field journal UI */
+:root{--ff-ink:#263f32;--ff-forest:#355c43;--ff-leaf:#6e9661;--ff-mint:#c8d9b1;--ff-paper:#f2ebd4;--ff-paper2:#e5dcc0;--ff-gold:#d4ad61;--ff-line:#9caf86}
+#gameShell{background:#233e34;border:4px solid #294837;box-shadow:0 18px 60px #10251a66;border-radius:8px}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+#hud{padding:18px;text-shadow:none}
+.brand{left:18px;top:18px;padding:10px 14px 11px 13px;border:2px solid #78966a;border-left:6px solid var(--ff-gold);border-radius:5px;background:#f2ebd4;box-shadow:0 4px 0 #294837;min-width:215px}
+.brand strong{font:900 23px/.95 Georgia,serif;letter-spacing:3px;color:#2e563d}
+.brand span{margin-top:6px;font:800 8px/1.2 system-ui;letter-spacing:1.3px;color:#658060}
+.status{right:18px;top:18px;gap:8px}
+.status span,.status button{clip-path:none;border:2px solid #7f9b70;border-radius:5px;background:#f2ebd4;color:#2d4d38;box-shadow:0 4px 0 #294837;backdrop-filter:none}
+.status span{min-width:88px;padding:10px 12px;font:900 10px/1 system-ui;letter-spacing:.7px}
+.status .coins{min-width:82px;color:#6b4e22}
+.status button{padding:9px 13px;font:900 10px system-ui;letter-spacing:.6px}
+.status button:hover{background:#dce7c5;border-color:#476d4c}
+.tool{left:18px;bottom:18px;gap:10px;min-width:220px;padding:10px 13px;background:#f2ebd4;border:2px solid #7f9b70;border-left:6px solid var(--ff-gold);border-radius:6px;box-shadow:0 4px 0 #294837;backdrop-filter:none}
+.tool i{width:30px;height:30px;border:2px solid #537b4f;filter:none}
+.tool i:before,.tool i:after{background:#537b4f;border-color:#537b4f}
+.tool b{font:900 10px system-ui;letter-spacing:.8px;color:#2e563d}
+.tool small{font:700 10px system-ui;color:#698163}
+.controls-hint{bottom:18px;gap:6px;padding:7px 10px;background:#f2ebd4;border:2px solid #8ba47a;border-radius:6px;box-shadow:0 4px 0 #294837;backdrop-filter:none}
+.controls-hint span{min-width:28px;padding:5px 6px;border:1px solid #78966a;border-radius:3px;background:#dce7c5;color:#2e563d;font:900 9px system-ui}
+.controls-hint small{color:#627b5b;font:800 8px system-ui;letter-spacing:.2px}
+.keys{right:18px;bottom:18px;gap:5px}
+.keys button{min-width:65px;padding:8px 8px;border:2px solid #78966a;border-radius:5px;background:#f2ebd4;color:#2d4d38;box-shadow:0 4px 0 #294837;backdrop-filter:none;clip-path:none;transition:transform .12s ease,background .12s ease}
+.keys button:hover{transform:translateY(-2px);border-color:#d4ad61;background:#dce7c5}
+.keys button:active{transform:translateY(2px);box-shadow:0 2px 0 #294837}
+.keys button b{font:900 12px system-ui;color:#355c43;letter-spacing:.4px}
+.keys button small{margin-top:4px;font:900 8px system-ui;letter-spacing:.3px;color:#698163}
+#panel,#dialog{clip-path:none;background:#f2ebd4;color:#2b4434;border:3px solid #78966a;border-radius:8px;box-shadow:0 7px 0 #203a2a,0 18px 44px #09150f88;backdrop-filter:none}
+#panel{top:88px;right:18px;width:340px;max-height:calc(100% - 180px);overflow:auto;padding:18px 18px 20px}
+#panel::-webkit-scrollbar-thumb{background:#8ca87a;border-radius:5px}
+#dialog{width:min(500px,88%);padding:26px;text-align:left}
+.close{border:2px solid #78966a;border-radius:4px;background:#dce7c5;color:#355c43;width:30px;height:30px;font-weight:900}
+.close:hover{background:#c9dbb4;border-color:#476d4c}
+.panel-kicker,.section-label{color:#6e8a60}
+.panel-kicker{font-size:9px;letter-spacing:1.8px}
+.panel-title{font:900 26px/1.05 Georgia,serif;color:#2e563d;margin:2px 0 6px}
+.panel-sub{font:600 12px/1.5 system-ui;color:#61775b;margin-bottom:16px}
+.section-label{margin:18px 0 8px;padding-bottom:6px;border-bottom:2px solid #d7ddc5;font:900 9px system-ui;letter-spacing:1.2px}
+.stat-grid{gap:8px}
+.mini-stat{padding:11px;border:2px solid #d4dcc4;border-radius:5px;background:#e8e4ca}
+.mini-stat b{font:900 9px system-ui;letter-spacing:.7px;color:#6e8460}
+.mini-stat strong{font:900 22px Georgia,serif;color:#3d6846}
+.mini-stat small{font:600 10px system-ui;color:#718366}
+.panel-icon{width:30px;height:30px;margin-right:9px;border:2px solid #c7d4b4;border-radius:4px;background:#e1e8cc;color:#436e48;font:900 12px system-ui}
+.card{gap:8px;padding:11px 0;border-top:1px solid #d7ddc5}
+.card b{font:800 12px/1.3 system-ui;color:#2b4434}
+.card small{margin-top:4px;font:600 10px/1.45 system-ui;color:#6c8062}
+.bar{height:7px;border-radius:5px;background:#d9dec8}
+.bar i{background:#78a267;border-radius:5px;box-shadow:none}
+.bar.big{height:9px}
+.xp-head{font:900 9px system-ui;color:#6e8460}
+.xp-head strong{font:900 15px Georgia,serif;color:#355c43}
+.resource-line{padding:11px;border-left:4px solid #d4ad61;border-radius:3px;background:#e6e5ce;color:#4d6647;font:700 11px/1.5 system-ui}
+.empty-state{padding:28px 12px;color:#687f5f;font:700 12px system-ui}
+.empty-state small{color:#879678}
+.choice{display:flex;gap:8px;align-items:center;width:100%;padding:12px;border:2px solid #d0d9be;border-radius:5px;background:#e8e8d0;color:#2b4434;margin:8px 0;font:750 12px system-ui;transition:background .12s,border-color .12s}
+.choice:hover{background:#dce7c5;border-color:#8ca87a;transform:none}
+.choice small{margin-top:4px;font-size:10px;color:#698163}
+#toast{bottom:108px;background:#f2ebd4;border:2px solid #78966a;border-radius:6px;color:#355c43;padding:11px 16px;font:900 11px system-ui;letter-spacing:.2px;box-shadow:0 4px 0 #294837}
+.buy{border:2px solid #6c9662;border-radius:4px;background:#6e9661;color:#fff7dd;padding:8px 11px;font:900 10px system-ui}
+.buy:hover{background:#527d4e}
+@media(max-width:900px){.brand{min-width:0;padding:8px 10px}.brand strong{font-size:18px}.brand span{font-size:7px}.keys{right:10px;bottom:10px;gap:3px}.keys button{min-width:52px;padding:6px 5px}.keys button small{font-size:7px}.controls-hint{bottom:66px}.tool{bottom:10px;left:10px;min-width:170px}.status{right:10px;top:10px}.status span{min-width:64px;padding:8px}.status button{padding:8px}}
+@media(max-width:600px){#hud{padding:8px}.brand{left:8px;top:8px}.status{right:8px;top:8px}.status span:first-child{display:none}.keys{left:8px;right:8px;justify-content:center}.tool{left:8px;bottom:54px;min-width:0}.controls-hint{display:none}#panel{left:8px;right:8px;top:75px;width:auto;max-height:calc(100% - 145px)}}
