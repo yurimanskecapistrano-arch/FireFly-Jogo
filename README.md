@@ -63,3 +63,12 @@ A nova direção visual usa pixel art 2D de baixa resolução, ampliada por *nea
 - `styles.css`: paleta de interface inspirada em musgo, madeira clara, menta e luz de vaga-lumes.
 
 **Princípio:** redesenhar a apresentação sem reescrever captura, pesca, progressão, inventário, missões ou salvamento. A direção visual deve continuar legível durante a exploração e em telas menores.
+
+### FireFly 9.1 — legibilidade e interface
+
+- Renderização em buffer 640×360, ampliada com nearest-neighbour; blocos de cenário mantêm alinhamento pixelado sem esmagar todos os detalhes.
+- Fauna redesenhada como sprites de pixel art com silhuetas distintas (borboleta, sapo, lagarto, aranha, rato, morcego e vagalumes).
+- Recursos coletáveis usam sprites de blocos, com contorno e contraste para madeira, fibra, cogumelos e minerais.
+- Placas de localização persistentes identificam vila, acampamento, regiões da floresta e setores da caverna.
+- HUD e painéis adotam linguagem de caderno de campo: papel quente, verde-floresta, hierarquia tipográfica mais clara, botões com estados de interação e contraste maior.
+- A interface do jogo permanece HTML/CSS sobre o canvas, separada da renderização do mundo.
